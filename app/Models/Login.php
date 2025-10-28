@@ -61,6 +61,8 @@ class Login extends Authenticatable implements MustVerifyEmail
 	 */
 	protected $casts = [
 	// 	'email_verified_at' => 'datetime',
+		'last_login_at' => 'datetime',
+		'is_active' => 'boolean',
 		'password' => 'hashed',		// this is because we are using clear text password
 	];
 
@@ -72,6 +74,11 @@ class Login extends Authenticatable implements MustVerifyEmail
 	public function belongstouser(): BelongsTo
 	{
 		return $this->belongsTo(\App\Models\User::class, 'user_id');
+	}
+
+	public function createdBy(): BelongsTo
+	{
+		return $this->belongsTo(User::class, 'created_by');
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +149,18 @@ class Login extends Authenticatable implements MustVerifyEmail
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Methods
+	public function markLogin($ipAddress)
+	{
+		$this->update([
+			'last_login_at' => now(),
+			'last_login_ip' => $ipAddress,
+		]);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// all acl will be done here
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 }
+

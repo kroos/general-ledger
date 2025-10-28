@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class Currency extends Model
 {
     //
-    use SoftDeletes;
+    use HasFactory;
     // protected $connection = '';
     // protected $table = '';
     // protected $primaryKey = '';
@@ -30,6 +30,15 @@ class Currency extends Model
     // const UPDATED_AT = '';
     // protected $rememberTokenName = '';
 
+    protected $fillable = [
+        'code', 'name', 'symbol', 'exchange_rate', 'rate_date', 'is_active', 'created_by'
+    ];
+
+    protected $casts = [
+        'exchange_rate' => 'decimal:6',
+        'rate_date' => 'date',
+        'is_active' => 'boolean',
+    ];
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // set column attribute
@@ -39,5 +48,48 @@ class Currency extends Model
     // }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // relationship
+    // Relationships
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Methods
+    public function convertAmount($amount, $toCurrency)
+    {
+        if ($this->code === $toCurrency) {
+            return $amount;
+        }
+
+        // Convert to base currency first (USD), then to target currency
+        $amountInBase = $amount / $this->exchange_rate;
+
+        $targetCurrency = self::where('code', $toCurrency)->first();
+        if ($targetCurrency) {
+            return $amountInBase * $targetCurrency->exchange_rate;
+        }
+
+        return $amount; // Fallback
+    }
+
+    public function getFormattedAmount($amount)
+    {
+        $formatted = number_format($amount, 2);
+
+        switch ($this->symbol) {
+            case '$':
+                return $this->symbol . $formatted;
+            case '€':
+                return $formatted . ' ' . $this->symbol;
+            case '£':
+                return $this->symbol . $formatted;
+            default:
+                return $formatted . ' ' . $this->code;
+        }
+    }
+
+    public static function getActiveCurrencies()
+    {
+        return self::where('is_active', true)->get();
+    }
 }

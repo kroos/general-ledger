@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class GeneralLedgerEntry extends Model
 {
     //
-    use SoftDeletes;
+    use HasFactory;
     // protected $connection = '';
     // protected $table = '';
     // protected $primaryKey = '';
@@ -30,6 +30,15 @@ class GeneralLedgerEntry extends Model
     // const UPDATED_AT = '';
     // protected $rememberTokenName = '';
 
+    protected $fillable = [
+        'company_id', 'general_ledger_id', 'account_id', 'party_id',
+        'debit', 'credit', 'notes', 'created_by'
+    ];
+
+    protected $casts = [
+        'debit' => 'decimal:2',
+        'credit' => 'decimal:2',
+    ];
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // set column attribute
@@ -39,5 +48,52 @@ class GeneralLedgerEntry extends Model
     // }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // relationship
+    // Relationships
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function generalLedger()
+    {
+        return $this->belongsTo(GeneralLedger::class);
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    public function party()
+    {
+        return $this->belongsTo(Party::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Methods
+    public function getAmountAttribute()
+    {
+        return $this->debit > 0 ? $this->debit : $this->credit;
+    }
+
+    public function isDebit()
+    {
+        return $this->debit > 0;
+    }
+
+    public function isCredit()
+    {
+        return $this->credit > 0;
+    }
+
+    public function getFormattedAmount()
+    {
+        $amount = $this->getAmountAttribute();
+        $sign = $this->isDebit() ? 'DR' : 'CR';
+        return number_format($amount, 2) . ' ' . $sign;
+    }
 }

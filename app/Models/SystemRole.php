@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 // use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 // use Illuminate\Database\Eloquent\Relations\HasMany;
 // use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-// use Illuminate\Database\Eloquent\Relations\BelongsTo;
-// use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 // load helper
 use Illuminate\Support\Str;
@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class SystemRole extends Model
 {
 	//
-	use SoftDeletes;
+	use HasFactory;
 	// protected $connection = '';
 	// protected $table = '';
 	// protected $primaryKey = '';
@@ -30,6 +30,14 @@ class SystemRole extends Model
 	// const UPDATED_AT = '';
 	// protected $rememberTokenName = '';
 
+	protected $fillable = [
+		'name', 'description', 'permissions', 'is_active', 'created_by'
+	];
+
+	protected $casts = [
+		'permissions' => 'array',
+		'is_active' => 'boolean',
+	];
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// set column attribute
@@ -39,31 +47,33 @@ class SystemRole extends Model
 	// }
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// relationship
-	// protected $fillable = [
-	// 	'name', 'description', 'permissions', 'is_active'
-	// ];
-
-	protected $guarded = [];
-
-	protected $casts = [
-		'permissions' => 'array',
-	];
-
-	public function users()
+	// Relationships
+	public function users(): BelongsToMany
 	{
 		return $this->belongsToMany(User::class, 'system_role_user')
 		->withTimestamps();
 	}
 
-	// Pre-defined system roles
-	public static function createDefaultRoles()
+	public function createdBy(): BelongsTo
+	{
+		return $this->belongsTo(User::class, 'created_by');
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Methods
+	public function hasPermission($permission)
+	{
+		return in_array($permission, $this->permissions) ||
+		in_array('*', $this->permissions);
+	}
+
+	public static function createDefaultRoles($createdBy)
 	{
 		$roles = [
 			[
 				'name' => 'system_admin',
 				'description' => 'Full system access across all companies',
-				'permissions' => ['*'], // All permissions
+				'permissions' => ['*'],
 			],
 			[
 				'name' => 'support_agent',
@@ -87,7 +97,10 @@ class SystemRole extends Model
 		];
 
 		foreach ($roles as $role) {
-			self::create($role);
+			self::create(array_merge($role, [
+				'is_active' => true,
+				'created_by' => $createdBy,
+			]));
 		}
 	}
 

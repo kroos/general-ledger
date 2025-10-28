@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class SystemActivityLog extends Model
 {
     //
-    use SoftDeletes;
+    use HasFactory;
     // protected $connection = '';
     // protected $table = '';
     // protected $primaryKey = '';
@@ -30,6 +30,14 @@ class SystemActivityLog extends Model
     // const UPDATED_AT = '';
     // protected $rememberTokenName = '';
 
+    protected $fillable = [
+        'user_id', 'action', 'description', 'context', 'ip_address', 'user_agent', 'performed_at'
+    ];
+
+    protected $casts = [
+        'context' => 'array',
+        'performed_at' => 'datetime',
+    ];
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // set column attribute
@@ -39,5 +47,32 @@ class SystemActivityLog extends Model
     // }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // relationship
+    // Relationships
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Methods
+    public static function log($action, $description, $context = [], $user = null)
+    {
+        if (!$user && auth()->check()) {
+            $user = auth()->user();
+        }
+
+        return self::create([
+            'user_id' => $user ? $user->id : null,
+            'action' => $action,
+            'description' => $description,
+            'context' => $context,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'performed_at' => now(),
+        ]);
+    }
+
+    public function getContextFormatted()
+    {
+        return json_encode($this->context, JSON_PRETTY_PRINT);
+    }
 }

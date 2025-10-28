@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class FinancialPeriod extends Model
 {
     //
-    use SoftDeletes;
+    use HasFactory;
     // protected $connection = '';
     // protected $table = '';
     // protected $primaryKey = '';
@@ -30,6 +30,17 @@ class FinancialPeriod extends Model
     // const UPDATED_AT = '';
     // protected $rememberTokenName = '';
 
+    protected $fillable = [
+        'company_id', 'name', 'start_date', 'end_date', 'is_closed',
+        'closed_at', 'closed_by', 'created_by'
+    ];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'closed_at' => 'datetime',
+        'is_closed' => 'boolean',
+    ];
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // set column attribute
@@ -39,5 +50,53 @@ class FinancialPeriod extends Model
     // }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // relationship
+    // Relationships
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function closedBy()
+    {
+        return $this->belongsTo(User::class, 'closed_by');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Methods
+    public function close($userId)
+    {
+        $this->update([
+            'is_closed' => true,
+            'closed_at' => now(),
+            'closed_by' => $userId,
+        ]);
+    }
+
+    public function isCurrent()
+    {
+        return !$this->is_closed &&
+               $this->start_date <= now() &&
+               $this->end_date >= now();
+    }
+
+    public function isPast()
+    {
+        return $this->end_date < now();
+    }
+
+    public function isFuture()
+    {
+        return $this->start_date > now();
+    }
+
+    public function getTransactions()
+    {
+        return $this->company->generalLedgers()
+                    ->whereBetween('transaction_date', [$this->start_date, $this->end_date])
+                    ->get();
+    }
 }

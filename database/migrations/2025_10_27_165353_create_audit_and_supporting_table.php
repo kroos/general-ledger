@@ -55,7 +55,7 @@ return new class extends Migration
 			$table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade');
 			$table->timestamps();
 
-			$table->index(['company_id', 'attachable_type', 'attachable_id']);
+			$table->index(['company_id', 'attachable_type', 'attachable_id'], 'compid_atttype_attid');
 			$table->index(['company_id', 'uploaded_by']);
 		});
 

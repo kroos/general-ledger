@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class Note extends Model
 {
     //
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
     // protected $connection = '';
     // protected $table = '';
     // protected $primaryKey = '';
@@ -30,6 +30,14 @@ class Note extends Model
     // const UPDATED_AT = '';
     // protected $rememberTokenName = '';
 
+    protected $fillable = [
+        'company_id', 'noteable_type', 'noteable_id', 'content',
+        'is_private', 'created_by'
+    ];
+
+    protected $casts = [
+        'is_private' => 'boolean',
+    ];
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // set column attribute
@@ -39,5 +47,39 @@ class Note extends Model
     // }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // relationship
+    // Relationships
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function noteable()
+    {
+        return $this->morphTo();
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Methods
+    public function canView($user)
+    {
+        if (!$this->is_private) {
+            return true;
+        }
+
+        // Private notes can only be viewed by the creator or system admins
+        return $this->created_by === $user->id || $user->isSystemAdmin();
+    }
+
+    public function getExcerpt($length = 100)
+    {
+        if (strlen($this->content) <= $length) {
+            return $this->content;
+        }
+
+        return substr($this->content, 0, $length) . '...';
+    }
 }
