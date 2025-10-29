@@ -22,7 +22,7 @@ class DocumentAttachment extends Model
     //
     use HasFactory;
     // protected $connection = '';
-    // protected $table = '';
+    protected $table = 'document_attachments';
     // protected $primaryKey = '';
     // public $incrementing = false;
     // protected $keyType = '';

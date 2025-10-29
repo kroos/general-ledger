@@ -22,7 +22,7 @@ class SystemSetting extends Model
     //
     use HasFactory;
     // protected $connection = '';
-    // protected $table = '';
+    protected $table = 'system_settings';
     // protected $primaryKey = '';
     // public $incrementing = false;
     // protected $keyType = '';

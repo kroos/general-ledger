@@ -22,7 +22,7 @@ class SystemActivityLog extends Model
     //
     use HasFactory;
     // protected $connection = '';
-    // protected $table = '';
+    protected $table = 'system_activity_logs';
     // protected $primaryKey = '';
     // public $incrementing = false;
     // protected $keyType = '';

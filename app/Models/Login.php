@@ -26,10 +26,11 @@ class Login extends Authenticatable implements MustVerifyEmail
 {
 	// protected $connection = 'mysql';
 	protected $table = 'logins';
-	protected $primaryKey = 'id';
+	// protected $primaryKey = 'id';
 
 	// use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 	use HasFactory, Notifiable, SoftDeletes;
+	use HasFactory, Notifiable, SoftDeletes, Authenticatable, Authorizable;
 
 	 /**
 	 * The attributes that are mass assignable.
@@ -71,7 +72,7 @@ class Login extends Authenticatable implements MustVerifyEmail
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// db relation belongsTo
-	public function belongstouser(): BelongsTo
+	public function user(): BelongsTo
 	{
 		return $this->belongsTo(\App\Models\User::class, 'user_id');
 	}
@@ -83,16 +84,16 @@ class Login extends Authenticatable implements MustVerifyEmail
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// no need this anymore cause we choose "logins" for auth, not "users" table anymore. config/auth.php
-	// public function getAuthIdentifierName()
-	// {
-	// 	return 'username';
-	// }
+	public function getAuthIdentifierName()
+	{
+		return $this->username;
+	}
 
 	// for password
-	// public function getAuthPassword()
-	// {
-	// 	return $this->password;
-	// }
+	public function getAuthPassword()
+	{
+		return $this->password;
+	}
 
 	// custom email reset password in
 	// https://laracasts.com/discuss/channels/laravel/how-to-override-the-tomail-function-in-illuminateauthnotificationsresetpasswordphp
@@ -133,7 +134,7 @@ class Login extends Authenticatable implements MustVerifyEmail
 	public function hasVerifiedEmail()
 	{
 		// return ! is_null($this->email_verified_at);
-		return ! is_null($this->belongstouser->email_verified_at);
+		return ! is_null($this->user->email_verified_at);
 	}
 
 	/**
@@ -143,20 +144,54 @@ class Login extends Authenticatable implements MustVerifyEmail
 	 */
 	public function markEmailAsVerified()
 	{
-		return $this->belongstouser->forceFill([
+		return $this->user->forceFill([
 			'email_verified_at' => $this->freshTimestamp(),
 		])->save();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Methods
-	public function markLogin($ipAddress)
-	{
-		$this->update([
-			'last_login_at' => now(),
-			'last_login_ip' => $ipAddress,
-		]);
-	}
+		// Custom Methods
+		public function markLogin($ipAddress)
+		{
+				$this->update([
+						'last_login_at' => now(),
+						'last_login_ip' => $ipAddress,
+				]);
+
+				// Also update user's last login if this is primary login
+				if ($this->type === 'email' || $this->is_primary) {
+						$this->user->update([
+								'last_login_at' => now(),
+						]);
+				}
+		}
+
+		public function isPrimary()
+		{
+				return $this->type === 'email' || $this->user->logins()->count() === 1;
+		}
+
+		// Scope for active logins
+		public function scopeActive($query)
+		{
+				return $query->where('is_active', true);
+		}
+
+		// Find login by any identifier (username, email, phone)
+		public static function findForAuthentication($identifier)
+		{
+				return static::with('user')
+						->active()
+						->where(function ($query) use ($identifier) {
+								$query->where('username', $identifier)
+											->orWhereHas('user', function ($q) use ($identifier) {
+													$q->where('email', $identifier)
+														->orWhere('phone', $identifier);
+											});
+						})
+						->first();
+		}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// all acl will be done here

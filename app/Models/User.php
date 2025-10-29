@@ -90,7 +90,6 @@ class User extends Authenticatable
 		return $this->belongsTo(User::class, 'created_by');
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// acl
 	// Methods
 	public function isSystemAdmin()
 	{
@@ -127,4 +126,33 @@ class User extends Authenticatable
 	{
 		return $this->logins()->where('is_active', true)->first();
 	}
+
+	public function getCurrentCompanyAttribute()
+	{
+		return session('current_company');
+	}
+
+	public function getCurrentCompanyIdAttribute()
+	{
+		return session('current_company_id');
+	}
+
+	public function getCurrentRoleAttribute()
+	{
+		return session('current_role');
+	}
+
+		// Rest of the relationships and methods remain the same...
+	public function logins()
+	{
+		return $this->hasMany(Login::class);
+	}
+
+	public function companies()
+	{
+		return $this->belongsToMany(Company::class, 'company_user')
+		->withPivot('role_id', 'is_active', 'assigned_by')
+		->withTimestamps();
+	}
+
 }

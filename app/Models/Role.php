@@ -21,7 +21,7 @@ class Role extends Model
 {
 	use HasFactory;
 	// protected $connection = '';
-	// protected $table = '';
+	protected $table = 'roles';
 	// protected $primaryKey = '';
 	// public $incrementing = false;
 	// protected $keyType = '';

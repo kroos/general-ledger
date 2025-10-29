@@ -22,7 +22,7 @@ class Company extends Model
 	//
 	use SoftDeletes, HasFactory;
 	// protected $connection = '';
-	// protected $table = '';
+	protected $table = 'companies';
 	// protected $primaryKey = '';
 	// public $incrementing = false;
 	// protected $keyType = '';

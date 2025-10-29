@@ -117,9 +117,25 @@ class EloquentUserProvider extends UserProvider
 //		return ($this->hasher->check($plain, $user->getAuthPassword()) && $user->belongstouser->status == true);
 //	}
 
+	// public function validateCredentials(UserContract $user, #[\SensitiveParameter] array $credentials)
+	// {
+	// 	// dd($credentials['password'], $user->getAuthPassword(), $this->hasher->check($credentials['password'], $user->getAuthPassword()), $this->hasher->info($user->getAuthPassword()), $this->hasher->make($credentials['password']));
+	// 	if (is_null($plain = $credentials['password'])) {
+	// 		return false;
+	// 	}
+
+	// 	if (is_null($hashed = $user->getAuthPassword())) {
+	// 		return false;
+	// 	}
+
+	// 	// return $this->hasher->check($plain, $hashed);
+	// 	// return ($this->hasher->check($plain, $hashed) && $user->belongstouser->active == true && $user->active == true);
+	// 	return ($this->hasher->check($plain, $hashed));
+
+	// }
+
 	public function validateCredentials(UserContract $user, #[\SensitiveParameter] array $credentials)
 	{
-		// dd($credentials['password'], $user->getAuthPassword(), $this->hasher->check($credentials['password'], $user->getAuthPassword()), $this->hasher->info($user->getAuthPassword()), $this->hasher->make($credentials['password']));
 		if (is_null($plain = $credentials['password'])) {
 			return false;
 		}
@@ -128,9 +144,25 @@ class EloquentUserProvider extends UserProvider
 			return false;
 		}
 
-		// return $this->hasher->check($plain, $hashed);
-		// return ($this->hasher->check($plain, $hashed) && $user->belongstouser->active == true && $user->active == true);
-		return ($this->hasher->check($plain, $hashed));
+		// Check password and both login & user are active
+		$passwordValid = $this->hasher->check($plain, $hashed);
+				$loginActive = $user->is_active; // Login is_active
+				$userActive = $user->user->is_active ?? false; // User is_active
 
+		return $passwordValid && $loginActive && $userActive;
 	}
+
+	public function retrieveByCredentials(array $credentials)
+	{
+		// First, find the login by username/email
+		$login = parent::retrieveByCredentials($credentials);
+
+		if (!$login) {
+			return null;
+		}
+
+		// Eager load the user relationship to avoid N+1 queries
+		return $login->load('user');
+	}
+
 }

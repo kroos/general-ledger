@@ -22,7 +22,7 @@ class GeneralLedgerEntry extends Model
     //
     use HasFactory;
     // protected $connection = '';
-    // protected $table = '';
+    protected $table = 'general_ledger_entries';
     // protected $primaryKey = '';
     // public $incrementing = false;
     // protected $keyType = '';

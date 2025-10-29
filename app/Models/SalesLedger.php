@@ -22,7 +22,7 @@ class SalesLedger extends Model
     //
     use HasFactory, SoftDeletes;
     // protected $connection = '';
-    // protected $table = '';
+    protected $table = 'sales_ledgers';
     // protected $primaryKey = '';
     // public $incrementing = false;
     // protected $keyType = '';

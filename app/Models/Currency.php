@@ -22,7 +22,7 @@ class Currency extends Model
     //
     use HasFactory;
     // protected $connection = '';
-    // protected $table = '';
+    protected $table = 'currencies';
     // protected $primaryKey = '';
     // public $incrementing = false;
     // protected $keyType = '';

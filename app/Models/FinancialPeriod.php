@@ -22,7 +22,7 @@ class FinancialPeriod extends Model
     //
     use HasFactory;
     // protected $connection = '';
-    // protected $table = '';
+    protected $table = 'financial_periods';
     // protected $primaryKey = '';
     // public $incrementing = false;
     // protected $keyType = '';

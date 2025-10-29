@@ -22,7 +22,7 @@ class Account extends Model
 	//
 	use HasFactory, SoftDeletes;
 	// protected $connection = '';
-	// protected $table = '';
+	protected $table = 'accounts';
 	// protected $primaryKey = '';
 	// public $incrementing = false;
 	// protected $keyType = '';

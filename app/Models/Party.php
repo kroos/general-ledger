@@ -21,7 +21,7 @@ class Party extends Model
 {
 	use HasFactory, SoftDeletes;
 	// protected $connection = '';
-	// protected $table = '';
+	protected $table = 'parties';
 	// protected $primaryKey = '';
 	// public $incrementing = false;
 	// protected $keyType = '';
