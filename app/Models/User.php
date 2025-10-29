@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+// use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
-
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Model;
+use Illuminate\Support\Str;
 
 // db relation class to load
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class User extends Authenticatable
+class User extends Model implements MustVerifyEmail
 {
 	/** @use HasFactory<\Database\Factories\UserFactory> */
 	use HasFactory, Notifiable, SoftDeletes;
@@ -62,6 +64,37 @@ class User extends Authenticatable
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	public function hasVerifiedEmail()
+	{
+		return !is_null($this->email_verified_at);
+	}
+
+	public function markEmailAsVerified()
+	{
+		return $this->forceFill([
+			'email_verified_at' => $this->freshTimestamp(),
+		])->save();
+	}
+
+	public function sendEmailVerificationNotification()
+	{
+		// We'll implement this when we set up email
+		// For now, you can use the default or create a custom one
+	}
+
+	public function routeNotificationForMail($notification)
+	{
+		// Return email address only...
+		// return $this->belongtouser->email;
+		return [$this->email => $this->name];
+	}
+
+	public function getEmailForVerification()
+	{
+		return $this->email;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// db relation hasMany/hasOne
 	public function logins(): HasMany
 	{
@@ -89,6 +122,7 @@ class User extends Authenticatable
 	{
 		return $this->belongsTo(User::class, 'created_by');
 	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Methods
 	public function isSystemAdmin()
@@ -140,19 +174,6 @@ class User extends Authenticatable
 	public function getCurrentRoleAttribute()
 	{
 		return session('current_role');
-	}
-
-		// Rest of the relationships and methods remain the same...
-	public function logins()
-	{
-		return $this->hasMany(Login::class);
-	}
-
-	public function companies()
-	{
-		return $this->belongsToMany(Company::class, 'company_user')
-		->withPivot('role_id', 'is_active', 'assigned_by')
-		->withTimestamps();
 	}
 
 }

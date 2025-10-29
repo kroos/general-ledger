@@ -1,5 +1,5 @@
-@if(\Auth::user()->belongstostaff->unreadNotifications->count())
-	@foreach(\Auth::user()->belongstostaff->unreadNotifications as $v)
+@if(\Auth::user()->user->unreadNotifications->count())
+	@foreach(\Auth::user()->user->unreadNotifications as $v)
 		<li>
 			<a class="dropdown-item" href="{{ $v->data['link'] }}">
 				<i class="fa-regular fa-comment"></i>

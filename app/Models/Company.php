@@ -45,7 +45,7 @@ class Company extends Model
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Relationships
-	public function users(): BelongsToMany
+	public function belongsToManyusers(): BelongsToMany
 	{
 		return $this->belongsToMany(User::class, 'company_user')
 		->withPivot('role_id', 'is_active', 'assigned_by')

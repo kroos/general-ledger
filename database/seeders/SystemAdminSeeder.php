@@ -27,10 +27,11 @@ class SystemAdminSeeder extends Seeder
 				'timezone' => 'UTC',
 				'is_active' => true,
 				'is_system_admin' => true,
-                'created_by' => null, // Self-created, so null is okay
-                'created_at' => now(),
-                'updated_at' => now(),
-              ]);
+				'email_verified_at' => now(),
+				'created_by' => null, // Self-created, so null is okay
+				'created_at' => now(),
+				'updated_at' => now(),
+			]);
 
 			// 2. Create login for system admin
 			DB::table('logins')->insert([

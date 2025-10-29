@@ -6,7 +6,7 @@
 	<form method="POST" action="{{ route('login') }}" accept-charset="UTF-8" id="form" autocomplete="off" class="needs-validation" enctype="multipart/form-data">
 		@csrf
 
-		<div class="form-group row m-2 @error('username') has-error @enderror">
+		<div class="form-group row m-2 @error('login') has-error @enderror">
 			<label for="username" class="col-sm-4 col-form-label col-form-label-sm">Enter username, email, or phone : </label>
 			<div class="col-sm-8">
 				<input type="text" name="login" id="username" value="{{ old('login') }}" class="form-control form-control-sm @error('login') is-invalid @enderror" placeholder="Enter username, email, or phone">

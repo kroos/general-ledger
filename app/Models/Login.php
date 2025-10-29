@@ -1,12 +1,12 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+// use Illuminate\Database\Eloquent\Model;
+use App\Models\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-// use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\HasApiTokens;
 
 // database relationship
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,15 +22,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // https://laracasts.com/discuss/channels/laravel/how-to-override-the-tomail-function-in-illuminateauthnotificationsresetpasswordphp
 // use App\Notifications\ResetPassword;
 
-class Login extends Authenticatable implements MustVerifyEmail
+class Login extends Authenticatable
 {
 	// protected $connection = 'mysql';
 	protected $table = 'logins';
 	// protected $primaryKey = 'id';
 
-	// use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
-	use HasFactory, Notifiable, SoftDeletes;
-	use HasFactory, Notifiable, SoftDeletes, Authenticatable, Authorizable;
+	use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+	// use HasFactory, Notifiable, SoftDeletes;
+	// use HasFactory, SoftDeletes, Authenticatable, SoftDeletes;
 
 	 /**
 	 * The attributes that are mass assignable.
@@ -79,21 +79,21 @@ class Login extends Authenticatable implements MustVerifyEmail
 
 	public function createdBy(): BelongsTo
 	{
-		return $this->belongsTo(User::class, 'created_by');
+		return $this->belongsTo(\App\Models\User::class, 'created_by');
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// no need this anymore cause we choose "logins" for auth, not "users" table anymore. config/auth.php
-	public function getAuthIdentifierName()
-	{
-		return $this->username;
-	}
+	// public function getAuthIdentifierName()
+	// {
+	// 	return $this->username;
+	// }
 
-	// for password
-	public function getAuthPassword()
-	{
-		return $this->password;
-	}
+	// // for password
+	// public function getAuthPassword()
+	// {
+	// 	return $this->password;
+	// }
 
 	// custom email reset password in
 	// https://laracasts.com/discuss/channels/laravel/how-to-override-the-tomail-function-in-illuminateauthnotificationsresetpasswordphp
@@ -111,7 +111,7 @@ class Login extends Authenticatable implements MustVerifyEmail
 	public function getEmailForPasswordReset()
 	{
 		// return $this->email;
-		return $this->belongstouser->email;
+		return $this->user->email;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ class Login extends Authenticatable implements MustVerifyEmail
 	{
 		// Return email address only...
 		// return $this->belongtouser->email;
-		return [$this->belongstouser->email => $this->belongstouser->name];
+		return [$this->user->email => $this->user->name];
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

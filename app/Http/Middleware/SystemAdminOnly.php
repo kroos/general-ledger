@@ -15,7 +15,7 @@ class SystemAdminOnly
 	 */
 	public function handle(Request $request, Closure $next): Response
 	{
-		if (!auth()->check() || !auth()->user()->isSystemAdmin()) {
+		if (!auth()->check() || !auth()->user()->user->isSystemAdmin()) {
 			return redirect()->route('dashboard')->with('error', 'System administrator access required.');
 		}
 

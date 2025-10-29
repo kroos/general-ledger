@@ -8,7 +8,7 @@ use App\Http\Controllers\CompanySelectionController;
 
 Route::get('/', function () {
 	return view('welcome');
-});
+})->middleware('guest');
 
 Route::post('/', function (Request $request) {
 	// dd($request->all());
@@ -47,25 +47,18 @@ Route::post('/', function (Request $request) {
 			'experiences.*.id' => 'ID',
 	]);
 	return redirect()->back()->with('success', 'Successfully submitted form');
-})->name('welcome');
+})->middleware('guest')->name('welcome');
 
 // Protected routes that require company selection
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'check.company', 'verified'])->name('dashboard');
 
-// Route::middleware(['auth', 'check.company', 'verified'])->group(function () {
-// 	Route::get('/dashboard', function () {
-// 		return view('dashboard');
-// 	});
-// })->name('dashboard');
-
 Route::middleware(['auth', 'password.confirm'])->group(function () {
 	Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 	Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
 	Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__.'/auth.php';
-require __DIR__.'/webSystemAdmin.php';
+// require __DIR__.'/webSystemAdmin.php';

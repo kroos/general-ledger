@@ -154,15 +154,33 @@ class EloquentUserProvider extends UserProvider
 
 	public function retrieveByCredentials(array $credentials)
 	{
-		// First, find the login by username/email
-		$login = parent::retrieveByCredentials($credentials);
+    // Accept either 'login' or 'username' as key
+		$loginValue = $credentials['login']
+		?? $credentials['username']
+		?? $credentials['email']
+		?? null;
 
-		if (!$login) {
+		if (empty($loginValue)) {
 			return null;
 		}
 
-		// Eager load the user relationship to avoid N+1 queries
-		return $login->load('user');
+		\Log::info('Attempting login for: ' . $loginValue);
+
+		$model = $this->createModel();
+
+    // Query by username OR user->email OR user->phone
+		$query = $this->newModelQuery($model)
+		->where(function ($q) use ($loginValue) {
+			$q->where('username', $loginValue)
+			->orWhereHas('user', function ($q2) use ($loginValue) {
+				$q2->where('email', $loginValue)
+				->orWhere('phone', $loginValue);
+			});
+		});
+
+		$login = $query->first();
+
+		return $login ? $login->load('user') : null;
 	}
 
 }

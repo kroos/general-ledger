@@ -16,7 +16,7 @@ class CheckCompany
 		}
 
 		// System admins can access without company
-		if (auth()->check() && auth()->user()->isSystemAdmin()) {
+		if (auth()->check() && auth()->user()->user->isSystemAdmin()) {
 			return $next($request);
 		}
 
