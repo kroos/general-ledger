@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 // load validation
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use {{ namespacedRequests }}
+// use {{ namespacedRequests }}
 
 // load batch and queue
 use Illuminate\Bus\Batch;

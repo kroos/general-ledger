@@ -117,25 +117,9 @@ class EloquentUserProvider extends UserProvider
 //		return ($this->hasher->check($plain, $user->getAuthPassword()) && $user->belongstouser->status == true);
 //	}
 
-	// public function validateCredentials(UserContract $user, #[\SensitiveParameter] array $credentials)
-	// {
-	// 	// dd($credentials['password'], $user->getAuthPassword(), $this->hasher->check($credentials['password'], $user->getAuthPassword()), $this->hasher->info($user->getAuthPassword()), $this->hasher->make($credentials['password']));
-	// 	if (is_null($plain = $credentials['password'])) {
-	// 		return false;
-	// 	}
-
-	// 	if (is_null($hashed = $user->getAuthPassword())) {
-	// 		return false;
-	// 	}
-
-	// 	// return $this->hasher->check($plain, $hashed);
-	// 	// return ($this->hasher->check($plain, $hashed) && $user->belongstouser->active == true && $user->active == true);
-	// 	return ($this->hasher->check($plain, $hashed));
-
-	// }
-
 	public function validateCredentials(UserContract $user, #[\SensitiveParameter] array $credentials)
 	{
+		// dd($credentials['password'], $user->getAuthPassword(), $this->hasher->check($credentials['password'], $user->getAuthPassword()), $this->hasher->info($user->getAuthPassword()), $this->hasher->make($credentials['password']));
 		if (is_null($plain = $credentials['password'])) {
 			return false;
 		}
@@ -144,43 +128,9 @@ class EloquentUserProvider extends UserProvider
 			return false;
 		}
 
-		// Check password and both login & user are active
-		$passwordValid = $this->hasher->check($plain, $hashed);
-				$loginActive = $user->is_active; // Login is_active
-				$userActive = $user->user->is_active ?? false; // User is_active
+		// return $this->hasher->check($plain, $hashed);
+		// return ($this->hasher->check($plain, $hashed) && $user->belongstouser->active == true && $user->active == true);
+		return ($this->hasher->check($plain, $hashed));
 
-		return $passwordValid && $loginActive && $userActive;
 	}
-
-	public function retrieveByCredentials(array $credentials)
-	{
-    // Accept either 'login' or 'username' as key
-		$loginValue = $credentials['login']
-		?? $credentials['username']
-		?? $credentials['email']
-		?? null;
-
-		if (empty($loginValue)) {
-			return null;
-		}
-
-		\Log::info('Attempting login for: ' . $loginValue);
-
-		$model = $this->createModel();
-
-    // Query by username OR user->email OR user->phone
-		$query = $this->newModelQuery($model)
-		->where(function ($q) use ($loginValue) {
-			$q->where('username', $loginValue)
-			->orWhereHas('user', function ($q2) use ($loginValue) {
-				$q2->where('email', $loginValue)
-				->orWhere('phone', $loginValue);
-			});
-		});
-
-		$login = $query->first();
-
-		return $login ? $login->load('user') : null;
-	}
-
 }

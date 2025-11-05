@@ -27,8 +27,8 @@
 				</li>
 
 
-				@auth
 					@include('layouts.navigation')
+				@auth
 				@else
 					<!-- nav for guest -->
 				@endauth
@@ -37,8 +37,8 @@
 				@auth
 					<div class="dropdown me-5">
 						<a href="#" class="btn btn-sm btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-							@if(\Auth::user()->user->unreadNotifications->count())<span class="badge text-bg-warning">{{$user->unreadNotifications->count()}}</span>@endif
-              {{ Auth::user()->user->name }}
+							@if(\Auth::user()->belongstouser->unreadNotifications->count())<span class="badge text-bg-warning">{{$user->unreadNotifications->count()}}</span>@endif
+              {{ Auth::user()->belongstouser->name }}
             </a>
 						<ul class="dropdown-menu">
 							<li>

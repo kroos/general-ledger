@@ -1,0 +1,136 @@
+<?php
+namespace App\Http\Controllers\Accounting;
+use App\Http\Controllers\Controller;
+
+// for controller output
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
+
+// models
+use App\Models\Accounting\SalesInvoice;
+use App\Models\Accounting\Account;
+
+use App\Services\Accounting\JournalService;
+
+// load db facade
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+
+// load validation
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+// use {{ namespacedRequests }}
+
+// load batch and queue
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
+
+// load email & notification
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;// more email
+
+// load pdf
+// use Barryvdh\DomPDF\Facade\Pdf;
+
+// load helper
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+
+// load Carbon library
+use \Carbon\Carbon;
+use \Carbon\CarbonPeriod;
+use \Carbon\CarbonInterval;
+
+use Session;
+use Throwable;
+use Exception;
+use Log;
+
+class SalesInvoiceController extends Controller
+{
+	public function index(Request $request)
+	{
+		if ($request->ajax()) {
+			$invoices = SalesInvoice::withCount('items')
+			->latest()->get();
+
+			return response()->json(['data' => $invoices]);
+		}
+
+		return view('accounting.sales_invoices.index');
+	}
+
+	public function create()
+	{
+		$accounts = Account::orderBy('code')->pluck('name', 'id');
+		return view('accounting.sales_invoices.create', compact('accounts'));
+	}
+
+	public function store(Request $request, JournalService $journalService)
+	{
+		return DB::transaction(function () use ($request, $journalService) {
+			$invoice = SalesInvoice::create($request->only([
+				'date','customer_id','reference_no','subtotal','tax','total','total_amount'
+			]));
+
+			foreach ($request->items ?? [] as $item) {
+				$invoice->items()->create($item);
+			}
+
+						// Create and post journal automatically
+			$journal = $journalService->recordInvoice($invoice);
+			$invoice->update(['journal_id' => $journal->id]);
+
+			return redirect()->route('accounting.sales-invoices.index')
+			->with('success', 'Invoice posted successfully.');
+		});
+	}
+
+	public function show(SalesInvoice $sales_invoice)
+	{
+		return view('accounting.sales_invoices.show', [
+			'invoice' => $sales_invoice->load('items.account', 'journal.entries.account')
+		]);
+	}
+
+	public function edit(SalesInvoice $sales_invoice)
+	{
+		$accounts = Account::orderBy('code')->pluck('name', 'id');
+		return view('accounting.sales_invoices.edit', [
+			'invoice' => $sales_invoice->load('items'),
+			'accounts' => $accounts
+		]);
+	}
+
+	public function update(Request $request, SalesInvoice $sales_invoice, JournalService $journalService)
+	{
+		return DB::transaction(function () use ($request, $sales_invoice, $journalService) {
+			$sales_invoice->update($request->only([
+				'date','customer_id','reference_no','subtotal','tax','total','total_amount'
+			]));
+
+			$sales_invoice->items()->delete();
+			foreach ($request->items ?? [] as $item) {
+				$sales_invoice->items()->create($item);
+			}
+
+			if ($sales_invoice->journal) {
+				$journalService->rebuildJournal($sales_invoice->journal, $sales_invoice->journal->entries->toArray());
+			}
+
+			return redirect()->route('accounting.sales-invoices.index')
+			->with('success', 'Invoice updated and journal rebuilt.');
+		});
+	}
+
+	public function destroy(SalesInvoice $sales_invoice)
+	{
+		$sales_invoice->delete();
+		return response()->json(['success' => true]);
+	}
+}

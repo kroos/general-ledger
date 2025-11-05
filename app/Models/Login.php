@@ -1,12 +1,12 @@
 <?php
+
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Illuminate\Database\Eloquent\Model;
-use App\Models\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+// use Laravel\Sanctum\HasApiTokens;
 
 // database relationship
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,15 +22,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // https://laracasts.com/discuss/channels/laravel/how-to-override-the-tomail-function-in-illuminateauthnotificationsresetpasswordphp
 // use App\Notifications\ResetPassword;
 
-class Login extends Authenticatable
+class Login extends Authenticatable implements MustVerifyEmail
 {
 	// protected $connection = 'mysql';
 	protected $table = 'logins';
-	// protected $primaryKey = 'id';
+	protected $primaryKey = 'id';
 
-	use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
-	// use HasFactory, Notifiable, SoftDeletes;
-	// use HasFactory, SoftDeletes, Authenticatable, SoftDeletes;
+	// use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+	use HasFactory, Notifiable, SoftDeletes;
 
 	 /**
 	 * The attributes that are mass assignable.
@@ -62,8 +61,6 @@ class Login extends Authenticatable
 	 */
 	protected $casts = [
 	// 	'email_verified_at' => 'datetime',
-		'last_login_at' => 'datetime',
-		'is_active' => 'boolean',
 		'password' => 'hashed',		// this is because we are using clear text password
 	];
 
@@ -72,24 +69,19 @@ class Login extends Authenticatable
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// db relation belongsTo
-	public function user(): BelongsTo
+	public function belongstouser(): BelongsTo
 	{
 		return $this->belongsTo(\App\Models\User::class, 'user_id');
-	}
-
-	public function createdBy(): BelongsTo
-	{
-		return $this->belongsTo(\App\Models\User::class, 'created_by');
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// no need this anymore cause we choose "logins" for auth, not "users" table anymore. config/auth.php
 	// public function getAuthIdentifierName()
 	// {
-	// 	return $this->username;
+	// 	return 'username';
 	// }
 
-	// // for password
+	// for password
 	// public function getAuthPassword()
 	// {
 	// 	return $this->password;
@@ -111,7 +103,7 @@ class Login extends Authenticatable
 	public function getEmailForPasswordReset()
 	{
 		// return $this->email;
-		return $this->user->email;
+		return $this->belongstouser->email;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +113,7 @@ class Login extends Authenticatable
 	{
 		// Return email address only...
 		// return $this->belongtouser->email;
-		return [$this->user->email => $this->user->name];
+		return [$this->belongstouser->email => $this->belongstouser->name];
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +126,7 @@ class Login extends Authenticatable
 	public function hasVerifiedEmail()
 	{
 		// return ! is_null($this->email_verified_at);
-		return ! is_null($this->user->email_verified_at);
+		return ! is_null($this->belongstouser->email_verified_at);
 	}
 
 	/**
@@ -144,58 +136,13 @@ class Login extends Authenticatable
 	 */
 	public function markEmailAsVerified()
 	{
-		return $this->user->forceFill([
+		return $this->belongstouser->forceFill([
 			'email_verified_at' => $this->freshTimestamp(),
 		])->save();
 	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Methods
-		// Custom Methods
-		public function markLogin($ipAddress)
-		{
-				$this->update([
-						'last_login_at' => now(),
-						'last_login_ip' => $ipAddress,
-				]);
-
-				// Also update user's last login if this is primary login
-				if ($this->type === 'email' || $this->is_primary) {
-						$this->user->update([
-								'last_login_at' => now(),
-						]);
-				}
-		}
-
-		public function isPrimary()
-		{
-				return $this->type === 'email' || $this->user->logins()->count() === 1;
-		}
-
-		// Scope for active logins
-		public function scopeActive($query)
-		{
-				return $query->where('is_active', true);
-		}
-
-		// Find login by any identifier (username, email, phone)
-		public static function findForAuthentication($identifier)
-		{
-				return static::with('user')
-						->active()
-						->where(function ($query) use ($identifier) {
-								$query->where('username', $identifier)
-											->orWhereHas('user', function ($q) use ($identifier) {
-													$q->where('email', $identifier)
-														->orWhere('phone', $identifier);
-											});
-						})
-						->first();
-		}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// all acl will be done here
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 }
-

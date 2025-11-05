@@ -21,10 +21,11 @@ class DatabaseSeeder extends Seeder
 		// ]);
 
 		$this->call([
-			YesNoOptionSeeder::class,
-			SystemAdminSeeder::class,
-			StarterKitSeeder::class,
-			AccountSeeder::class,
+				YesNoOptionSeeder::class,
+		    LedgerTypeSeeder::class,
+		    AccountSeeder::class,
+		    TransactionRuleSeeder::class,
+		    RoleSeeder::class,
 		]);
 	}
 }

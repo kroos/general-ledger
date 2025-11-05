@@ -3,21 +3,21 @@
 @section('content')
 <div class="col-sm-12 d-flex flex-column align-items-center justify-content-center">
 	<h3 class="">Sign In</h3>
-	<form method="POST" action="{{ route('login') }}" accept-charset="UTF-8" id="form" autocomplete="off" class="needs-validation" enctype="multipart/form-data">
+	<form method="POST" action="{{ route('login') }}" id="form" class="needs-validation">
 		@csrf
 
-		<div class="form-group row m-2 @error('login') has-error @enderror">
-			<label for="username" class="col-sm-4 col-form-label col-form-label-sm">Enter username, email, or phone : </label>
+		<div class="form-group row m-2 @error('username') has-error @enderror">
+			<label for="username" class="col-sm-4 col-form-label col-form-label-sm">Username : </label>
 			<div class="col-sm-8">
-				<input type="text" name="login" id="username" value="{{ old('login') }}" class="form-control form-control-sm @error('login') is-invalid @enderror" placeholder="Enter username, email, or phone">
-				@error('login') <div class="invalid-feedback fw-lighter">{{ $message }}</div> @enderror
+				<input type="text" name="username" id="username" value="{{ old('username') }}" class="form-control form-control-sm @error('username') is-invalid @enderror" placeholder="Username">
+				@error('username') <div class="invalid-feedback fw-lighter">{{ $message }}</div> @enderror
 			</div>
 		</div>
 
 		<div class="form-group row m-2 @error('password') has-error @enderror">
 			<label for="password" class="col-sm-4 col-form-label col-form-label-sm">Password : </label>
 			<div class="col-sm-8">
-				<input type="password" id="password" name="password" class="form-control form-control-sm @error('username') is-invalid @enderror" placeholder="Password">
+				<input type="password" id="password" name="password" value="{{ old('password') }}" class="form-control form-control-sm @error('username') is-invalid @enderror" placeholder="Password">
 				@error('password') <div class="invalid-feedback fw-lighter">{{ $message }}</div> @enderror
 			</div>
 		</div>
@@ -46,24 +46,4 @@
 @endsection
 
 @section('js')
-$(document).ready(function() {
-	$('#form').bootstrapValidator({
-		fields: {
-			login: {
-				validators: {
-					notEmpty: {
-						message: 'Please enter your username, email, or phone'
-					}
-				}
-			},
-			password: {
-				validators: {
-					notEmpty: {
-						message: 'Please enter your password'
-					}
-				}
-			}
-		}
-	});
-});
 @endsection

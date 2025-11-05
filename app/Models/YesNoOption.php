@@ -16,9 +16,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class YesNoOption extends Model
 {
+    //
     use SoftDeletes;
     // protected $connection = '';
-    protected $table = 'yes_no_options';
+    // protected $table = '';
     // protected $primaryKey = '';
     // public $incrementing = false;
     // protected $keyType = '';

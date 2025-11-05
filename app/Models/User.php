@@ -3,10 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\Model;
 use Illuminate\Support\Str;
 
 // db relation class to load
@@ -16,10 +14,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 // use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 // use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+// use Illuminate\Database\Eloquent\Relations\BelongsTo;
+// use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class User extends Model implements MustVerifyEmail
+class User extends Authenticatable
 {
 	/** @use HasFactory<\Database\Factories\UserFactory> */
 	use HasFactory, Notifiable, SoftDeletes;
@@ -41,16 +39,16 @@ class User extends Model implements MustVerifyEmail
 
 	protected $guarded = [];
 
-	/**
-	* The attributes that should be cast.
-	*
-	* @var array<string, string>
-	*/
+	 /**
+	 * The attributes that should be cast.
+	 *
+	 * @var array<string, string>
+	 */
 	protected $casts = [
 		'email_verified_at' => 'datetime',
-		'is_active' => 'boolean',
-		'is_system_admin' => 'boolean',
+		// 'password' => 'hashed',		// this is because we are using clear text password
 	];
+
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	public function setNameAttribute($value)
@@ -64,116 +62,12 @@ class User extends Model implements MustVerifyEmail
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	public function hasVerifiedEmail()
-	{
-		return !is_null($this->email_verified_at);
-	}
-
-	public function markEmailAsVerified()
-	{
-		return $this->forceFill([
-			'email_verified_at' => $this->freshTimestamp(),
-		])->save();
-	}
-
-	public function sendEmailVerificationNotification()
-	{
-		// We'll implement this when we set up email
-		// For now, you can use the default or create a custom one
-	}
-
-	public function routeNotificationForMail($notification)
-	{
-		// Return email address only...
-		// return $this->belongtouser->email;
-		return [$this->email => $this->name];
-	}
-
-	public function getEmailForVerification()
-	{
-		return $this->email;
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// db relation hasMany/hasOne
-	public function logins(): HasMany
+	public function hasmanylogin(): HasMany
 	{
 		return $this->hasMany(Login::class, 'user_id');
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// db relation belongsToMany
-	public function companies(): BelongsToMany
-	{
-		return $this->belongsToMany(Company::class, 'company_user')
-		->withPivot('role_id', 'is_active', 'assigned_by')
-		->withTimestamps();
-	}
-
-	public function systemRoles(): BelongsToMany
-	{
-		return $this->belongsToMany(SystemRole::class, 'system_role_user')
-		->withTimestamps();
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// belongsto
-	public function createdBy(): BelongsTo
-	{
-		return $this->belongsTo(User::class, 'created_by');
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Methods
-	public function isSystemAdmin()
-	{
-		return $this->is_system_admin || $this->systemRoles()
-		->where('name', 'system_admin')
-		->exists();
-	}
-
-	public function accessibleCompanies()
-	{
-		if ($this->isSystemAdmin()) {
-			return Company::all();
-		}
-
-		return $this->companies()->where('is_active', true)->get();
-	}
-
-	public function hasSystemPermission($permission)
-	{
-		if ($this->isSystemAdmin()) {
-			return true;
-		}
-
-		return $this->systemRoles()
-		->where('is_active', true)
-		->get()
-		->contains(function ($role) use ($permission) {
-			return in_array($permission, $role->permissions) ||
-			in_array('*', $role->permissions);
-		});
-	}
-
-	public function getPrimaryLoginAttribute()
-	{
-		return $this->logins()->where('is_active', true)->first();
-	}
-
-	public function getCurrentCompanyAttribute()
-	{
-		return session('current_company');
-	}
-
-	public function getCurrentCompanyIdAttribute()
-	{
-		return session('current_company_id');
-	}
-
-	public function getCurrentRoleAttribute()
-	{
-		return session('current_role');
-	}
 
 }
