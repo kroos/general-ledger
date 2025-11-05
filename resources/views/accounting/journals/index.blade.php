@@ -15,25 +15,28 @@
 @endsection
 
 @section('js')
-$(function(){
-  $('#journals-table').DataTable({
-    ajax: '{{ route("journals.index") }}',
-    serverSide: true,
-    processing: true,
-    columns: [
-      {data:'id', title:'ID'},
-      {data:'date', title:'Date'},
-      {data:'reference_no', title:'Reference'},
-      {data:'ledger', title:'Ledger'},
-      {data:'status', title:'Status'},
-      {data:'description', title:'Description'},
-      {data:'action', title:'Actions', orderable:false, searchable:false}
-    ]
-  });
+DataTable.datetime( 'D MMM YYYY' );
+DataTable.datetime( 'YYYY' );
+DataTable.datetime( 'h:mm a' );
+$('#journals-table').DataTable({
+  dom: 'Bfrtip',
+  ajax: '{{ route("journals.index") }}',
+  serverSide: true,
+  processing: true,
+  columns: [
+    {data:'id', title:'ID'},
+    {data:'date', title:'Date'},
+    {data:'reference_no', title:'Reference'},
+    {data:'ledger', title:'Ledger'},
+    {data:'status', title:'Status'},
+    {data:'description', title:'Description'},
+    {data:'action', title:'Actions', orderable:false, searchable:false}
+  ]
+});
 
 $('.btn-delete').off('click').on('click', function(){
   const id = $(this).data('id');
-  Swal.fire({
+  swal.fire({
     title: 'Delete Journal?',
     text: 'This will soft-delete the record.',
     icon: 'warning',
@@ -49,10 +52,5 @@ $('.btn-delete').off('click').on('click', function(){
       });
     }
   });
-});
-
-
-
-
 });
 @endsection

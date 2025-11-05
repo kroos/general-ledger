@@ -23,7 +23,7 @@
 <script type="module">
 $('.btn-delete').off('click').on('click', function(){
   const id = $(this).data('id');
-  Swal.fire({
+  swal.fire({
     title: 'Delete Journal?',
     text: 'This will soft-delete the record.',
     icon: 'warning',

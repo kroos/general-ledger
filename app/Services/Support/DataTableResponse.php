@@ -23,7 +23,7 @@ class DataTableResponse
 			return null;
 		}
 
-			// Search filter
+		// Search filter
 		$searchValue = $request->input('search.value');
 		if ($searchValue) {
 			$query->where(function ($q) use ($searchValue, $columns) {
@@ -33,7 +33,7 @@ class DataTableResponse
 			});
 		}
 
-			// Sorting
+		// Sorting
 		if ($request->has('order.0.column')) {
 			$colIndex = $request->input('order.0.column');
 			$dir = $request->input('order.0.dir', 'asc');
@@ -43,17 +43,17 @@ class DataTableResponse
 			$query->orderByDesc('id');
 		}
 
-			// Paging
+		// Paging
 		$total = $query->count();
 		$start = intval($request->input('start', 0));
 		$length = intval($request->input('length', 10));
 
 		$data = $query->skip($start)->take($length)->get();
 
-			// Transform rows
+		// Transform rows
 		$rows = $data->map($map);
 
-			// Return JSON formatted as DataTables expects
+		// Return JSON formatted as DataTables expects
 		return response()->json([
 			'draw' => intval($request->input('draw')),
 			'recordsTotal' => $total,

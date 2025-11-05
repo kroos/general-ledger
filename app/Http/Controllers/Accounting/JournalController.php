@@ -56,8 +56,7 @@ class JournalController extends Controller
 	/** Journal list page (DataTables AJAX) */
 	public function index(Request $request)
 	{
-		$query = Journal::with('ledgerType')
-		->select(['id','date','reference_no','ledger_type_id','status','description']);
+		$query = Journal::with('ledgerType')->select(['id','date','reference_no','ledger_type_id','status','description']);
 
 		if ($response = DataTableResponse::from($request, $query, ['id','date','reference_no','status','description'], function($j) {
 			return [
@@ -96,6 +95,7 @@ class JournalController extends Controller
 			'entries.*.account_id' => 'required|exists:accounts,id',
 			'entries.*.debit' => 'nullable|numeric',
 			'entries.*.credit' => 'nullable|numeric',
+			'entries.*.description' => 'nullable|string',
 		]);
 
 		DB::beginTransaction();
