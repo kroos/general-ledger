@@ -19,25 +19,3 @@
     <i class="fa fa-trash"></i>
   </button>
 </div>
-
-<script type="module">
-$('.btn-delete').off('click').on('click', function(){
-  const id = $(this).data('id');
-  swal.fire({
-    title: 'Delete Journal?',
-    text: 'This will soft-delete the record.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, delete it'
-  }).then(res=>{
-    if(res.isConfirmed){
-      $.ajax({
-        url: '{{ url("journals.destroy") }}/'+id,
-        type: 'DELETE',
-        data: {_token:'{{ csrf_token() }}'},
-        success: ()=> location.reload()
-      });
-    }
-  });
-});
-</script>

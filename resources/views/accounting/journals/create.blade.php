@@ -35,7 +35,7 @@ $("#entries").remAddRow({
 				<select name="${name}[${i}][account_id]" id="acc_${i}" class="form-select form-select-sm account-select @error('entries.*.account_id') is-invalid @enderror">
 					<option value="">Please choose</option>
 					@foreach($accounts as $id=>$name)
-					<option value="{{ $id }}">{{ $name }}</option>
+					<option value="{{ $id }}" {{ (old('entries.*.account_id') == $id)?'selected':NULL }}>{{ $name }}</option>
 					@endforeach
 				</select>
 				@error('entries.*.account_id')
@@ -89,4 +89,39 @@ $("#entries").remAddRow({
 		console.log("Account removed:", `entry_${i}`);
 	},
 });
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// restore after fail form process
+
+const oldEntries = @json(old('entries', []));
+const errors = @json($errors->toArray());
+console.log(oldEntries, errors);
+
+// === Restore old SKILLS ===
+if (oldEntries.length > 0) {
+	oldEntries.forEach(function (entry, i) {
+		$("#entry_add").trigger('click'); // simulate add entry
+		const $entry = $("#entries").children().eq(i);
+		$entry.find(`select[name="entries[${i}][account_id]"]`).val(entry.account_id || '').trigger('change.select2');
+
+		// restore account_id
+//		const $select = $entry.find(`[name="entries[${i}][account_id]"]`);
+//		$select.val(entry.account_id).trigger('change.select2'); // important for Select2 UI
+
+		// apply validation errors
+//		const $row = $(`#entry_${i}`);
+//		const fieldKey = `entries.${i}.account_id`;
+//		if (errors[fieldKey]) {
+//			const msg = errors[fieldKey][0];
+//			$select.addClass('is-invalid');
+//			$row.find('.invalid-feedback').text(msg).removeClass('d-none');
+//		}
+
+		$entry.find(`input[name="entries[${i}][debit]"]`).val(entry.debit || '');
+		$entry.find(`input[name="entries[${i}][credit]"]`).val(entry.credit || '');
+		$entry.find(`input[name="entries[${i}][description]"]`).val(entry.description || '');
+	});
+}
+
+
 @endsection

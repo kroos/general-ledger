@@ -34,7 +34,7 @@ $('#journals-table').DataTable({
   ]
 });
 
-$('.btn-delete').off('click').on('click', function(){
+$(document).on('click', '.btn-delete', function(e){
   const id = $(this).data('id');
   swal.fire({
     title: 'Delete Journal?',

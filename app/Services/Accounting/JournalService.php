@@ -1,11 +1,8 @@
 <?php
 namespace App\Services\Accounting;
 
-use App\Models\Accounting\Journal;
-use App\Models\Accounting\TransactionRule;
-
 use App\Models\Accounting\{
-	Account, Journal, JournalEntry, Payment, SalesInvoice, PurchaseBill
+	Account, Journal, JournalEntry, Payment, SalesInvoice, PurchaseBill, TransactionRule
 };
 
 // load db facade
@@ -249,79 +246,6 @@ class JournalService
 	}
 
 	/**
-	 * Record a payment as a double-entry journal.
-	 */
-	public function recordPayment(Payment $payment): Journal
-	{
-		try {
-			return DB::transaction(function () use ($payment) {
-				// 1️⃣ Create the main journal
-				$journal = Journal::create([
-					'date'        => $payment->date,
-					'description' => sprintf(
-						'%s Payment - %s',
-						ucfirst($payment->type),
-						$payment->reference_no ?? 'No Ref'
-					),
-					'status'      => 'posted',
-					'posted_at'   => now(),
-									'ledger_type_id' => 1, // General Ledger for now
-									'source_type' => get_class($payment),
-									'source_id'   => $payment->id,
-				]);
-
-				// 2️⃣ Debit and Credit sides
-				if ($payment->type === 'receive') {
-					// Received from customer: Debit bank/cash, Credit receivable or income
-					JournalEntry::create([
-						'journal_id' => $journal->id,
-											'account_id' => $payment->account_id, // Bank/Cash account
-											'debit'      => $payment->amount,
-											'credit'     => 0,
-											'memo'       => 'Cash/Bank Received',
-					]);
-
-					JournalEntry::create([
-						'journal_id' => $journal->id,
-											'account_id' => $this->guessOffsetAccount($payment), // Income or AR
-											'debit'      => 0,
-											'credit'     => $payment->amount,
-											'memo'       => 'Offset Entry (Income/Receivable)',
-					]);
-				} else {
-					// Payment to supplier: Debit expense or payable, Credit bank/cash
-					JournalEntry::create([
-						'journal_id' => $journal->id,
-						'account_id' => $this->guessOffsetAccount($payment),
-						'debit'      => $payment->amount,
-						'credit'     => 0,
-						'memo'       => 'Offset Entry (Expense/Payable)',
-					]);
-
-					JournalEntry::create([
-						'journal_id' => $journal->id,
-						'account_id' => $payment->account_id,
-						'debit'      => 0,
-						'credit'     => $payment->amount,
-						'memo'       => 'Cash/Bank Payment',
-					]);
-				}
-
-				// 3️⃣ Link the journal back to the payment
-				$payment->update(['journal_id' => $journal->id]);
-
-				return $journal;
-			});
-		} catch (\Throwable $e) {
-			Log::error('Failed to record payment journal: ' . $e->getMessage(), [
-				'payment_id' => $payment->id,
-				'trace'      => $e->getTraceAsString(),
-			]);
-			throw $e;
-		}
-	}
-
-	/**
 	 * Dummy offset logic — later replaced with proper mapping.
 	 * For now, returns the first non-bank account for simplicity.
 	 */
@@ -349,128 +273,6 @@ class JournalService
 
 			// Re-create the journal entries for the current payment values
 			$this->recordPayment($payment);
-		});
-	}
-
-	/**
-	 * Record journal entries for a Sales Invoice.
-	 */
-	public function recordInvoice(SalesInvoice $invoice): Journal
-	{
-		return DB::transaction(function () use ($invoice) {
-
-					// 1. Delete any previous journal if invoice is being re-posted
-			$existing = Journal::where([
-				'source_type' => SalesInvoice::class,
-				'source_id' => $invoice->id,
-			])->first();
-
-			if ($existing) {
-				$existing->entries()->delete();
-				$existing->delete();
-			}
-
-					// 2. Create a new Journal
-			$journal = Journal::create([
-				'date' => $invoice->date,
-				'description' => 'Sales Invoice #' . $invoice->reference_no,
-							'ledger_type_id' => 1, // General Ledger
-							'source_type' => SalesInvoice::class,
-							'source_id' => $invoice->id,
-							'status' => 'posted',
-							'posted_at' => now(),
-						]);
-
-					// 3. Get Accounts
-					$arAccount = config('accounting.defaults.accounts_receivable_id', 2); // example default
-					$salesAccount = config('accounting.defaults.sales_revenue_id', 3);
-
-					// 4. Journal Entries
-					JournalEntry::insert([
-						[
-							'journal_id' => $journal->id,
-							'account_id' => $arAccount,
-							'debit' => $invoice->total_amount,
-							'credit' => 0,
-							'memo' => 'Accounts Receivable',
-							'created_at' => now(),
-							'updated_at' => now(),
-						],
-						[
-							'journal_id' => $journal->id,
-							'account_id' => $salesAccount,
-							'debit' => 0,
-							'credit' => $invoice->total_amount,
-							'memo' => 'Sales Revenue',
-							'created_at' => now(),
-							'updated_at' => now(),
-						],
-					]);
-
-					$journal->logActivity('posted');
-
-					return $journal;
-				});
-	}
-
-	/**
-	 * Record journal entries for a Purchase Bill.
-	 */
-	public function recordBill(PurchaseBill $bill): Journal
-	{
-		return DB::transaction(function () use ($bill) {
-
-			// 1. Delete any previous journal if bill is being re-posted
-			$existing = Journal::where([
-				'source_type' => PurchaseBill::class,
-				'source_id' => $bill->id,
-			])->first();
-
-			if ($existing) {
-				$existing->entries()->delete();
-				$existing->delete();
-			}
-
-			// 2. Create a new Journal
-			$journal = Journal::create([
-				'date' => $bill->date,
-				'description' => 'Purchase Bill #' . $bill->reference_no,
-				'ledger_type_id' => 1,
-				'source_type' => PurchaseBill::class,
-				'source_id' => $bill->id,
-				'status' => 'posted',
-				'posted_at' => now(),
-			]);
-
-			// 3. Get Accounts
-			$apAccount = config('accounting.defaults.accounts_payable_id', 4);
-			$expenseAccount = config('accounting.defaults.expense_default_id', 5);
-
-			// 4. Journal Entries
-			JournalEntry::insert([
-				[
-					'journal_id' => $journal->id,
-					'account_id' => $expenseAccount,
-					'debit' => $bill->total_amount,
-					'credit' => 0,
-					'memo' => 'Expense',
-					'created_at' => now(),
-					'updated_at' => now(),
-				],
-				[
-					'journal_id' => $journal->id,
-					'account_id' => $apAccount,
-					'debit' => 0,
-					'credit' => $bill->total_amount,
-					'memo' => 'Accounts Payable',
-					'created_at' => now(),
-					'updated_at' => now(),
-				],
-			]);
-
-			$journal->logActivity('posted');
-
-			return $journal;
 		});
 	}
 
