@@ -14,13 +14,27 @@ $('#ledger_type_id').select2({
 	width: '100%',
 	allowClear: true,
 	closeOnSelect: true,
-});
-$('.account-select').select2({
-	theme:'bootstrap-5',
-	placeholder: 'Please choose',
-	width: '100%',
-	allowClear: true,
-	closeOnSelect: true,
+	ajax: {
+		url: '{{ route('getLedgerTypes') }}', // same API you showed earlier
+		type: 'GET',
+		dataType: 'json',
+		delay: 250, // prevents excessive requests while typing
+		data: function (params) {
+			return {
+				_token: '{{ csrf_token() }}',
+				search: params.term // optional if you want filtering
+			};
+		},
+		processResults: function (data) {
+			// API returns plain array, so map it to Select2 format
+			return {
+				results: data.map(item => ({
+					id: item.id,
+					text: item.name
+				}))
+			};
+		}
+	}
 });
 
 $("#entries").remAddRow({
@@ -32,12 +46,7 @@ $("#entries").remAddRow({
 	rowTemplate: (i, name) => `
 		<tr id="entry_${i}" class="@error('entries.*.account_id') has-error @enderror">
 			<td>
-				<select name="${name}[${i}][account_id]" id="acc_${i}" class="form-select form-select-sm account-select @error('entries.*.account_id') is-invalid @enderror">
-					<option value="">Please choose</option>
-					@foreach($accounts as $id=>$name)
-					<option value="{{ $id }}" {{ (old('entries.*.account_id') == $id)?'selected':NULL }}>{{ $name }}</option>
-					@endforeach
-				</select>
+				<select name="${name}[${i}][account_id]" id="acc_${i}" class="form-select form-select-sm account-select @error('entries.*.account_id') is-invalid @enderror"></select>
 				@error('entries.*.account_id')
 				<div class="invalid-feedback">
 					{{ $message }}
@@ -83,6 +92,27 @@ $("#entries").remAddRow({
 			width: '100%',
 			allowClear: true,
 			closeOnSelect: true,
+			ajax: {
+				url: '{{ route('getAccounts') }}', // same API you showed earlier
+				type: 'GET',
+				dataType: 'json',
+				delay: 250, // prevents excessive requests while typing
+				data: function (params) {
+					return {
+						_token: '{{ csrf_token() }}',
+						search: params.term // optional if you want filtering
+					};
+				},
+				processResults: function (data) {
+					// API returns plain array, so map it to Select2 format
+					return {
+						results: data.map(item => ({
+							id: item.id,
+							text: item.code + ' ' + item.name
+						}))
+					};
+				}
+			}
 		});
 	},
 	onRemove: (i) => {
@@ -94,28 +124,32 @@ $("#entries").remAddRow({
 // restore after fail form process
 
 const oldEntries = @json(old('entries', []));
-const errors = @json($errors->toArray());
-console.log(oldEntries, errors);
+console.log(oldEntries);
 
 // === Restore old SKILLS ===
 if (oldEntries.length > 0) {
 	oldEntries.forEach(function (entry, i) {
 		$("#entry_add").trigger('click'); // simulate add entry
-		const $entry = $("#entries").children().eq(i);
-		$entry.find(`select[name="entries[${i}][account_id]"]`).val(entry.account_id || '').trigger('change.select2');
+		const $entries = $("#entries").children().eq(i);
+		const $entry = $entries.find(`select[name="entries[${i}][account_id]"]`);
 
-		// restore account_id
-//		const $select = $entry.find(`[name="entries[${i}][account_id]"]`);
-//		$select.val(entry.account_id).trigger('change.select2'); // important for Select2 UI
+		if (entry.account_id) {
+			// Create option element manually
+			const entryOption = new Option('Loading...', entry.account_id, true, true);
+			$entry.append(entryOption).trigger('change');
 
-		// apply validation errors
-//		const $row = $(`#entry_${i}`);
-//		const fieldKey = `entries.${i}.account_id`;
-//		if (errors[fieldKey]) {
-//			const msg = errors[fieldKey][0];
-//			$select.addClass('is-invalid');
-//			$row.find('.invalid-feedback').text(msg).removeClass('d-none');
-//		}
+			// Fetch actual country name asynchronously
+			$.ajax({
+				url: '{{ route('getAccounts') }}',
+				dataType: 'json'
+			}).then(data => {
+				const found = data.find(d => String(d.id) === String(entry.account_id));
+				if (found) {
+					const option = new Option(found.code +' '+ found.name, found.id, true, true);
+					$entry.empty().append(option).trigger('change');
+				}
+			});
+		}
 
 		$entry.find(`input[name="entries[${i}][debit]"]`).val(entry.debit || '');
 		$entry.find(`input[name="entries[${i}][credit]"]`).val(entry.credit || '');

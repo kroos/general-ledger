@@ -77,6 +77,16 @@ class PaymentController extends Controller
 
 	public function store(Request $request, JournalService $journalService)
 	{
+		$validated = $request->validate([
+			'type' => 'required',
+			'date' => 'required',
+			'reference_no' => 'nullable',
+			'amount' => 'required',
+			'account_id' => 'required',
+			'source_type' => 'required',
+			'source_id' => 'required',
+		]);
+
 		return DB::transaction(function () use ($request, $journalService) {
 			$payment = Payment::create($request->only([
 				'type','date','reference_no','amount','account_id','source_type','source_id'

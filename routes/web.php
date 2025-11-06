@@ -124,7 +124,3 @@ Route::get('journals/draft-count', function() {
 })->name('journals.draft-count');
 
 
-
-
-
-

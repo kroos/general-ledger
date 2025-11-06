@@ -13,7 +13,7 @@ use Illuminate\View\View;
 use App\Models\Accounting\{Journal, LedgerType, Account};
 
 use App\Services\Accounting\JournalService;
-use App\Services\Support\DataTableResponse;
+// use App\Services\Support\DataTableResponse;
 
 // load db facade
 use Illuminate\Database\Eloquent\Builder;
@@ -53,35 +53,15 @@ use Log;
 
 class JournalController extends Controller
 {
-	/** Journal list page (DataTables AJAX) */
 	public function index(Request $request)
 	{
-		$query = Journal::with('ledgerType')->select(['id','date','reference_no','ledger_type_id','status','description']);
-
-		if ($response = DataTableResponse::from($request, $query, ['id','date','reference_no','status','description'], function($j) {
-			return [
-				'id' => $j->id,
-				'date' => $j->date?->format('Y-m-d'),
-				'reference_no' => $j->reference_no ?? '-',
-				'ledger' => $j->ledgerType?->name ?? '-',
-				'status' => ucfirst($j->status),
-				'description' => $j->description ?? '-',
-				'action' => view('accounting.journals._actions', compact('j'))->render(),
-			];
-		})) {
-			return $response;
-		}
-
 		return view('accounting.journals.index');
 	}
 
 	/** Show create form */
 	public function create()
 	{
-		$ledgerTypes = LedgerType::pluck('name', 'id');
-		$accounts = Account::orderBy('code')->pluck('name','id');
-
-		return view('accounting.journals.create', compact('ledgerTypes','accounts'));
+		return view('accounting.journals.create');
 	}
 
 	/** Store draft or post journal manually */
@@ -99,6 +79,7 @@ class JournalController extends Controller
 		]);
 
 		DB::beginTransaction();
+
 		try {
 			$journal = Journal::create([
 				'date' => $data['date'],
@@ -116,26 +97,39 @@ class JournalController extends Controller
 				]);
 			}
 
-						// Draft-aware posting
+			$totalDebit = $journal->entries->sum('debit');
+			$totalCredit = $journal->entries->sum('credit');
+
 			if ($request->has('post_now')) {
 				if (!$journal->isBalanced()) {
-					return back()->withErrors(['msg' => 'Cannot post unbalanced journal.']);
+					DB::rollBack();
+					return back()
+					->withInput()
+					->withErrors(['msg' => 'Cannot post unbalanced journal. Please ensure total debit equals total credit.']);
 				}
 				$journal->update(['status' => 'posted']);
+			} else {
+				if (bccomp($totalDebit, $totalCredit, 2) !== 0) {
+                // Optional: warn user but still save as draft
+					session()->flash('status', 'Draft saved but journal is unbalanced.');
+				}
 			}
 
 			DB::commit();
 
-			return redirect()->route('journals.index')
-			->with('success', $journal->status === 'posted'
-						 ? 'Journal posted successfully.'
-						 : 'Draft journal saved.');
+			return redirect()->route('journals.index')->with('success',
+			                                                 $journal->status === 'posted'
+			                                                 ? 'Journal posted successfully.'
+			                                                 : 'Draft journal saved.'
+			                                               );
+
 		} catch (\Throwable $e) {
 			DB::rollBack();
 			report($e);
-			return back()->withErrors(['message' => $e->getMessage()]);
+			return back()->withInput()->withErrors(['msg' => $e->getMessage()]);
 		}
 	}
+
 
 	/** Post existing draft */
 	public function post(Journal $journal)

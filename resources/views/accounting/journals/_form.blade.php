@@ -13,12 +13,7 @@
       </div>
       <div class="form-group col-md-4 @error('ledger_type_id') has-error @enderror">
         <label class="form-label">Ledger Type</label>
-        <select name="ledger_type_id" id="ledger_type_id" class="form-select form-select-sm @error('ledger_type_id') is-invalid @enderror">
-          <option value="">Please choose</option>
-          @foreach($ledgerTypes as $id=>$name)
-            <option value="{{ $id }}" {{ (old('ledger_type_id', @$variable->ledger_type_id) == $id)?'selected':NULL }}>{{ $name }}</option>
-          @endforeach
-        </select>
+        <select name="ledger_type_id" id="ledger_type_id" class="form-select form-select-sm @error('ledger_type_id') is-invalid @enderror"></select>
         @error('ledger_type_id')
           <div class="invalid-feedback">
             {{ $message }}

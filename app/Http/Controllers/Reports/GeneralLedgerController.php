@@ -52,8 +52,6 @@ class GeneralLedgerController extends Controller
 {
 	public function index(Request $request)
 	{
-		$accounts = Account::orderBy('code')->get();
-
 		if ($request->ajax()) {
 			$accountId = $request->account_id;
 			$entries = JournalEntry::whereHas('journal', fn($q) => $q->where('status', 'posted'))
@@ -79,6 +77,6 @@ class GeneralLedgerController extends Controller
 			return response()->json(['data' => $data]);
 		}
 
-		return view('reports.general-ledger.index', compact('accounts'));
+		return view('reports.general-ledger.index');
 	}
 }

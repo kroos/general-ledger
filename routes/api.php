@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 use App\Http\Controllers\API\YesNoOptionController;
+use App\Http\Controllers\API\JavaScriptSupportController;
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -45,3 +46,10 @@ Route::get('/states/{country_id}', function ($country_id) {
 
 	return response()->json($filtered);
 })->name('states');
+
+
+Route::controller(JavaScriptSupportController::class)->group(function () {
+	Route::get('/getAccounts', 'getAccounts')->name('getAccounts');
+	Route::get('/getJournals', 'getJournals')->name('getJournals');
+	Route::get('/getLedgerTypes', 'getLedgerTypes')->name('getLedgerTypes');
+});
