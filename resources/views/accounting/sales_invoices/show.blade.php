@@ -60,7 +60,7 @@
       <tfoot>
         <tr><th colspan="5" class="text-end">Subtotal</th><th class="text-end">{{ number_format($invoice->subtotal, 2) }}</th></tr>
         <tr><th colspan="5" class="text-end">Tax</th><th class="text-end">{{ number_format($invoice->tax, 2) }}</th></tr>
-        <tr class="table-success"><th colspan="5" class="text-end">Total</th><th class="text-end">{{ number_format($invoice->total, 2) }}</th></tr>
+        <tr class="table-success"><th colspan="5" class="text-end">Total</th><th class="text-end">{{ number_format($invoice->total_amount, 2) }}</th></tr>
       </tfoot>
     </table>
 

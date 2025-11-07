@@ -1,69 +1,187 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="card">
-  <div class="card-header">
-    <h5><i class="fa fa-plus"></i> Create Sales Invoice</h5>
-  </div>
-  <div class="card-body">
-    <form method="POST" action="{{ route('accounting.sales-invoices.store') }}" id="invoiceForm">
-      @csrf
-      @include('accounting.sales_invoices._form', ['invoice' => null])
-      <div class="text-end mt-3">
-        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save & Post</button>
-      </div>
-    </form>
-  </div>
+<div class="col-sm-12">
+	<form method="POST" action="{{ route('accounting.sales-invoices.store') }}" id="form" autocomplete="off">
+		@csrf
+		<div class="card border-success">
+			<div class="card-header bg-success text-white">
+				<i class="fa fa-file-invoice"></i> New Sales Invoice
+			</div>
+
+			<div class="card-body">
+				@include('accounting.sales_invoices._form')
+			</div>
+			<div class="card-footer text-end">
+				<button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Draft</button>
+				<a href="{{ route('accounting.sales-invoices.index') }}" class="btn btn-secondary">Cancel</a>
+			</div>
+		</div>
+	</form>
 </div>
 @endsection
 
 @section('js')
-$(function () {
-  // Initialize Select2
-  $('.select2').select2({ theme: 'bootstrap-5' });
+recalcTotals();
+$(document).on('input', '#tax_rate_percent', recalcTotals);
 
-  // Add/Remove Rows
-  $('#addRow').click(function () {
-    const index = $('#itemsTable tbody tr').length;
-    const row = `
-    <tr>
-      <td>
-        <select name="items[${index}][account_id]" class="form-select form-select-sm select2" required>
-          <option value="">Select Account</option>
-          @foreach($accounts as $id => $name)
-          <option value="{{ $id }}">{{ $name }}</option>
-          @endforeach
-        </select>
-      </td>
-      <td><input type="text" name="items[${index}][description]" class="form-control form-control-sm"></td>
-      <td><input type="number" step="0.01" name="items[${index}][amount]" class="form-control form-control-sm text-end" required></td>
-      <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow"><i class="fa fa-times"></i></button></td>
-    </tr>`;
-    $('#itemsTable tbody').append(row);
-    $('.select2').select2({ theme: 'bootstrap-5' });
-  });
+$("#items_wrap").remAddRow({
+	addBtn: "#item_add",
+	maxFields: 50,
+	removeSelector: ".item_remove",
+	fieldName: "items",
+	rowIdPrefix: "item",
+	rowTemplate: (i, name) => `
+		<div class="row item-row border-bottom py-1 align-items-center" id="item_${i}">
+			<div class="col-sm-4 @error('items.*.account_id') has-error @enderror">
+				<select name="${name}[${i}][account_id]" id="account_${i}" class="form-select form-select-sm @error('items.*.account_id') is-invalid @enderror"></select>
+				@error('items.*.account_id')
+				<div class="invalid-feedback">
+					{{ $message }}
+				</div>
+				@enderror
+			</div>
+			<div class="col-sm-3 @error('items.*.description') has-error @enderror">
+				<input type="text" name="${name}[${i}][description]" value="{{ old('items.*.description') }}" class="form-control form-control-sm @error('items.*.description') is-invalid @enderror" placeholder="Description">
+				@error('items.*.description')
+				<div class="invalid-feedback">
+					{{ $message }}
+				</div>
+				@enderror
+			</div>
+			<div class="col-sm-1 @error('items.*.quantity') has-error @enderror">
+				<input type="number" step="0.1" name="${name}[${i}][quantity]" value="{{ old('items.*.quantity', 1) }}" class="form-control form-control-sm quantity @error('items.*.quantity') is-invalid @enderror">
+				@error('items.*.quantity')
+				<div class="invalid-feedback">
+					{{ $message }}
+				</div>
+				@enderror
+			</div>
+			<div class="col-sm-2 @error('items.*.unit_price') has-error @enderror">
+				<input type="number" step="0.01" name="${name}[${i}][unit_price]" value="{{ old('items.*.unit_price') }}" class="form-control form-control-sm unit_price @error('items.*.unit_price') is-invalid @enderror">
+				@error('items.*.unit_price')
+				<div class="invalid-feedback">
+					{{ $message }}
+				</div>
+				@enderror
+			</div>
+			<div class="col-sm-1 text-end">
+				<input type="number" step="0.1" name="${name}[${i}][amount]" value="{{ old('items.*.amount') }}" class="form-control form-control-sm amount" readonly>
+			</div>
+			<div class="col-sm-1 text-center">
+				<button type="button" class="btn btn-sm btn-danger item_remove"><i class="fa fa-times"></i></button>
+			</div>
+		</div>
+	`,
+	onAdd: (i, row) => {
+		console.log("Items added:", `item_${i}`, row);
 
-  $(document).on('click', '.removeRow', function() {
-    $(this).closest('tr').remove();
-    calcTotal();
-  });
+		$(`#account_${i}`).select2({
+			placeholder: 'Select Account',
+			width: '100%',
+			allowClear: true,
+			closeOnSelect: true,
+			theme: 'bootstrap-5',
+			ajax: {
+				url: '{{ route('getAccounts') }}',
+				type: 'GET',
+				dataType: 'json',
+				delay: 250, // prevents excessive requests while typing
+				data: function (params) {
+					return {
+						_token: '{{ csrf_token() }}',
+						search: params.term // optional if you want filtering
+					};
+				},
+				processResults: function (data) {
+					// API returns plain array, so map it to Select2 format
+					return {
+						results: data.map(item => ({
+							id: item.id,
+							text: item.code + ' ' + item.name
+						}))
+					};
+				}
+			}
+		});
 
-  // Calculate totals
-  $(document).on('input', '#itemsTable input[name*="[amount]"], #tax', function() {
-    calcTotal();
-  });
+		// Bind input events to the new row
+		$(`#item_${i} .quantity, #item_${i} .unit_price`).on('input', recalcTotals);
 
-  function calcTotal() {
-    let subtotal = 0;
-    $('#itemsTable tbody tr').each(function () {
-      subtotal += parseFloat($(this).find('input[name*="[amount]"]').val()) || 0;
-    });
-    const tax = parseFloat($('#tax').val()) || 0;
-    $('#subtotal').val(subtotal.toFixed(2));
-    $('#total').val((subtotal + tax).toFixed(2));
-  }
+		// Trigger calculation after adding new row
+		setTimeout(recalcTotals, 100);
 
-  // Restore previous Select2 if validation fails
-  $('.select2').select2({ theme: 'bootstrap-5' });
+	},
+	onRemove: (i) => {
+		console.log("Items removed:", `item_${i}`);
+		recalcTotals();
+	},
 });
+
+function recalcTotals() {
+	let subtotal = 0;
+
+	$('#items_wrap .item-row').each(function() {
+		const qty = parseFloat($(this).find('.quantity').val()) || 0;
+		const price = parseFloat($(this).find('.unit_price').val()) || 0;
+		const amt = qty * price;
+
+		$(this).find('.amount').val(amt.toFixed(2));
+		subtotal += amt;
+	});
+
+	const subtotalFixed = subtotal.toFixed(2);
+	const taxRate = parseFloat($('#tax_rate_percent').val()) / 100 || 0;
+	const tax = (subtotal * taxRate).toFixed(2);
+	const total = (parseFloat(subtotal) + parseFloat(tax)).toFixed(2);
+
+	$('[name="subtotal"]').val(subtotalFixed);
+	$('[name="tax"]').val(tax);
+	$('[name="total_amount"]').val(total);
+}
+
+// Confirm before submit
+$('#form').on('submit', function(e) {
+	e.preventDefault();
+	swal.fire({
+		title: 'Save as draft?',
+		text: 'You can post this invoice later.',
+		icon: 'question',
+		showCancelButton: true,
+		confirmButtonText: 'Yes, save it',
+	}).then(res => {
+		if (res.isConfirmed) this.submit();
+	});
+});
+
+// restore from failed validation
+const oldItems = @json(old('items', []));
+if (oldItems.length > 0) {
+	oldItems.forEach(function (item, i) {
+		$("#item_add").trigger('click');
+		const $items = $("#items_wrap").children().eq(i);
+		const $account = $items.find(`select[name="items[${i}][account_id]"]`);
+
+		if (item.account_id) {
+			$.ajax({
+				url: `{{ route('getAccounts') }}`,
+				dataType: 'json',
+				data: {
+					id: `${item.account_id}`,
+					_token: `{{ csrf_token() }}`,
+				}
+			}).then(data => {
+				const found = data.find(d => String(d.id) === String(item.account_id));
+				if (found) {
+					const option = new Option(found.code +' '+ found.name, found.id, true, true);
+					$account.append(option).trigger('change');
+				}
+			});
+		}
+		$items.find(`input[name="items[${i}][unit_price]"]`).val(item.unit_price || '');
+		$items.find(`input[name="items[${i}][quantity]"]`).val(item.quantity || '');
+		$items.find(`input[name="items[${i}][description]"]`).val(item.description || '');
+		$items.find(`input[name="items[${i}][amount]"]`).val(item.amount || '');
+	});
+}
 @endsection

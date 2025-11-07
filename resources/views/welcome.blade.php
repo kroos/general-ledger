@@ -568,9 +568,16 @@ $("#countries_wrap").remAddRow({
 ///////////////////////////////////////////////////////////////////////////////////////////
 // restore after fail form process
 $(function () {
-	const oldSkills = @json(old('skills', []));
-	const oldExperiences = @json(old('experiences', []));
-	const oldCountries = @json(old('countries', []));
+
+@php
+    $items = @$variable?->hasmanyModel()?->get(['column']);
+    $itemsArray = $items?->toArray();
+    $oldItemsValue = old('items', $itemsArray);
+@endphp
+
+	const oldSkills = @json(old('skills', @$variable?->hasmanyModel()?->get(['column'])?->toArray() ));
+	const oldExperiences = @json(old('experiences', @$variable?->hasmanyModel()?->get(['column'])?->toArray() ));
+	const oldCountries = @json(old('countries', @$variable?->hasmanyModel()?->get(['column'])?->toArray() ));
 
 	// === Restore old SKILLS ===
 	if (oldSkills.length > 0) {

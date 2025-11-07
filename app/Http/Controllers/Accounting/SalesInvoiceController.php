@@ -55,39 +55,45 @@ class SalesInvoiceController extends Controller
 {
 	public function index(Request $request)
 	{
-		if ($request->ajax()) {
-			$invoices = SalesInvoice::withCount('items')
-			->latest()->get();
-
-			return response()->json(['data' => $invoices]);
-		}
-
 		return view('accounting.sales_invoices.index');
 	}
 
 	public function create()
 	{
-		$accounts = Account::orderBy('code')->pluck('name', 'id');
 		return view('accounting.sales_invoices.create', compact('accounts'));
 	}
 
 	public function store(Request $request, JournalService $journalService)
 	{
+		$request->validate([
+			'date' => 'required',
+			'reference_no' => 'required|string|max:255',
+			'customer_id' => 'nullable',
+			'tax' => 'required|numeric',
+			'tax_rate_percent' => 'required|numeric',
+			'subtotal' => 'required|numeric',
+			'total_amount' => 'required|numeric',
+			'items' => 'required|array|min:1',
+			'items.*.account_id' => 'required|numeric',
+			'items.*.description' => 'nullable|string|max:500',
+			'items.*.quantity' => 'required|numeric',
+			'items.*.unit_price' => 'required|numeric',
+			'items.*.amount' => 'required|numeric',
+		]);
+
 		return DB::transaction(function () use ($request, $journalService) {
 			$invoice = SalesInvoice::create($request->only([
-				'date','customer_id','reference_no','subtotal','tax','total','total_amount'
+				'date', 'customer_id', 'reference_no', 'subtotal', 'tax', 'total_amount', 'tax_rate_percent'
 			]));
 
 			foreach ($request->items ?? [] as $item) {
 				$invoice->items()->create($item);
 			}
-
-						// Create and post journal automatically
+			// Create and post journal automatically
 			$journal = $journalService->recordInvoice($invoice);
 			$invoice->update(['journal_id' => $journal->id]);
 
-			return redirect()->route('accounting.sales-invoices.index')
-			->with('success', 'Invoice posted successfully.');
+			return redirect()->route('accounting.sales-invoices.index')->with('success', 'Invoice posted successfully.');
 		});
 	}
 
@@ -100,18 +106,30 @@ class SalesInvoiceController extends Controller
 
 	public function edit(SalesInvoice $sales_invoice)
 	{
-		$accounts = Account::orderBy('code')->pluck('name', 'id');
-		return view('accounting.sales_invoices.edit', [
-			'invoice' => $sales_invoice->load('items'),
-			'accounts' => $accounts
-		]);
+		return view('accounting.sales_invoices.edit', ['invoice' => $sales_invoice->load('items')]);
 	}
 
 	public function update(Request $request, SalesInvoice $sales_invoice, JournalService $journalService)
 	{
+		$request->validate([
+			'date' => 'required',
+			'reference_no' => 'required|string|max:255',
+			'customer_id' => 'nullable',
+			'tax' => 'required|numeric',
+			'subtotal' => 'required|numeric',
+			'tax_rate_percent' => 'required|numeric',
+			'total_amount' => 'required|numeric',
+			'items' => 'required|array|min:1',
+			'items.*.account_id' => 'required|numeric',
+			'items.*.description' => 'nullable|string|max:500',
+			'items.*.quantity' => 'required|numeric',
+			'items.*.unit_price' => 'required|numeric',
+			'items.*.amount' => 'required|numeric',
+		]);
+
 		return DB::transaction(function () use ($request, $sales_invoice, $journalService) {
 			$sales_invoice->update($request->only([
-				'date','customer_id','reference_no','subtotal','tax','total','total_amount'
+				'date','customer_id','reference_no','subtotal','tax','total','total_amount', 'tax_rate_percent'
 			]));
 
 			$sales_invoice->items()->delete();
@@ -123,8 +141,7 @@ class SalesInvoiceController extends Controller
 				$journalService->rebuildJournal($sales_invoice->journal, $sales_invoice->journal->entries->toArray());
 			}
 
-			return redirect()->route('accounting.sales-invoices.index')
-			->with('success', 'Invoice updated and journal rebuilt.');
+			return redirect()->route('accounting.sales-invoices.index')->with('success', 'Invoice updated and journal rebuilt.');
 		});
 	}
 

@@ -26,6 +26,7 @@ $('#pid').select2({
 	width: '100%',
 	allowClear: true,
 	closeOnSelect: true,
+	theme: 'bootstrap-5',
 	ajax: {
 		url: '{{ route('getAccounts') }}', // same API you showed earlier
 		type: 'GET',
@@ -53,7 +54,7 @@ $('#pid').select2({
 		url: '{{ route('getAccounts') }}',
 		type: 'GET',
 		data: {
-			search: "{{ old('account_id')}}",
+			id: "{{ old('account_id')}}",
 			_token: '{{ csrf_token() }}',
 		},
 		success: function (response) {

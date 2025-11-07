@@ -12,7 +12,8 @@ use Illuminate\Http\JsonResponse;
 
 // models
 use App\Models\Accounting\{
-	Journal, Account, Customer, LedgerType, Payment, Purchase, PurchaseBill, Sale, SalesInvoice, Supplier, TransactionRule
+	Journal, Account, Customer, LedgerType, Payment, Purchase, PurchaseBill, Sale, SalesInvoice, Supplier, TransactionRule,
+
 };
 
 // load db facade
@@ -58,8 +59,10 @@ class JavaScriptSupportController extends Controller
 		$values = Account::where('active', '1')
 											->when($request->search, function($query) use ($request){
 												$query->where('code','LIKE','%'.$request->search.'%')
-												->orWhere('name','LIKE','%'.$request->search.'%')
-												->orWhere('id','LIKE','%'.$request->search.'%');
+												->orWhere('name','LIKE','%'.$request->search.'%');
+											})
+											->when($request->id, function($query) use ($request){
+												$query->where('id', $request->id);
 											})
 											->orderBy('id')
 											->get();
@@ -73,6 +76,9 @@ class JavaScriptSupportController extends Controller
 												$query->where('ledger_type.name','LIKE','%'.$request->search.'%')
 												->orWhere('name','LIKE','%'.$request->search.'%');
 											})
+											->when($request->id, function($query) use ($request){
+												$query->where('id', $request->id);
+											})
 											->orderBy('id')
 											->get();
 		return response()->json($values);
@@ -83,6 +89,39 @@ class JavaScriptSupportController extends Controller
 		$values = LedgerType::when($request->search, function($query) use ($request){
 												$query->where('name','LIKE','%'.$request->search.'%')
 												->orWhere('slug','LIKE','%'.$request->search.'%');
+											})
+											->when($request->id, function($query) use ($request){
+												$query->where('id', $request->id);
+											})
+											->orderBy('id')
+											->get();
+		return response()->json($values);
+	}
+
+	public function getSalesInvoices(Request $request): JsonResponse
+	{
+		$values = SalesInvoice::with('items')
+											->when($request->search, function($query) use ($request){
+												$query->where('reference_no','LIKE','%'.$request->search.'%')
+												->orWhere('status','LIKE','%'.$request->search.'%');
+											})
+											->when($request->id, function($query) use ($request){
+												$query->where('id', $request->id);
+											})
+											->orderBy('id')
+											->get();
+		return response()->json($values);
+	}
+
+	public function getPurchaseBills(Request $request): JsonResponse
+	{
+		$values = PurchaseBill::with('items')
+											->when($request->search, function($query) use ($request){
+												$query->where('reference_no','LIKE','%'.$request->search.'%')
+												->orWhere('status','LIKE','%'.$request->search.'%');
+											})
+											->when($request->id, function($query) use ($request){
+												$query->where('id', $request->id);
 											})
 											->orderBy('id')
 											->get();

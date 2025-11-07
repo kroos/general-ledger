@@ -1,60 +1,68 @@
-<div class="row g-3">
-  <div class="col-md-3">
-    <label class="form-label">Date</label>
-    <input type="date" name="date" value="{{ old('date', optional($invoice)->date?->format('Y-m-d')) }}" class="form-control form-control-sm" required>
-  </div>
-  <div class="col-md-3">
-    <label class="form-label">Reference No.</label>
-    <input type="text" name="reference_no" value="{{ old('reference_no', $invoice->reference_no ?? '') }}" class="form-control form-control-sm" required>
-  </div>
-  <div class="col-md-6">
-    <label class="form-label">Customer</label>
-    <select name="customer_id" id="customerSelect" class="form-select form-select-sm">
-      <option value="">Select Customer</option>
-      {{-- Populate dynamically if customer table exists --}}
-    </select>
-  </div>
+	<div class="row mb-2">
+		<div class="col-sm-4 @error('date') has-error @enderror">
+			<label class="form-label">Date:</label>
+			<input type="date" name="date" id="date" value="{{ old('date', \Carbon\Carbon::parse($invoice->date)->format('Y-m-d')) }}" class="form-control form-control-sm @error('date') is-invalid @enderror">
+			@error('date')
+			<div class="invalid-feedback">
+				{{ $message }}
+			</div>
+			@enderror
+		</div>
+		<div class="col-sm-4 @error('reference_no') has-error @enderror">
+			<label class="form-label">Reference No:</label>
+			<input type="text" name="reference_no" id="reference_no" value="{{ old('reference_no', $invoice->reference_no) }}" class="form-control form-control-sm @error('reference_no') is-invalid @enderror" value="{{ old('reference_no') }}">
+			@error('reference_no')
+			<div class="invalid-feedback">
+				{{ $message }}
+			</div>
+			@enderror
+		</div>
+		<div class="col-sm-4 @error('customer_id') has-error @enderror">
+			<label for="cust" class="form-label">Customer ID:</label>
+			<select name="customer_id" id="cust" class="form-select form-select-sm @error('customer_id') is-invalid @enderror"></select>
+			@error('customer_id')
+			<div class="invalid-feedback">
+				{{ $message }}
+			</div>
+			@enderror
+		</div>
+	</div>
 
-  <div class="col-12 mt-3">
-    <table class="table table-sm table-bordered align-middle" id="itemsTable">
-      <thead class="table-light">
-        <tr>
-          <th style="width: 30%">Account</th>
-          <th>Description</th>
-          <th style="width: 20%">Amount</th>
-          <th style="width: 5%"><button type="button" class="btn btn-sm btn-success" id="addRow"><i class="fa fa-plus"></i></button></th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach(old('items', $invoice->items ?? [['account_id'=>'','description'=>'','amount'=>'']]) as $i => $item)
-        <tr>
-          <td>
-            <select name="items[{{ $i }}][account_id]" class="form-select form-select-sm select2" required>
-              <option value="">Select Account</option>
-              @foreach($accounts as $id => $name)
-                <option value="{{ $id }}" {{ $id == ($item['account_id'] ?? null) ? 'selected' : '' }}>{{ $name }}</option>
-              @endforeach
-            </select>
-          </td>
-          <td><input type="text" name="items[{{ $i }}][description]" value="{{ $item['description'] ?? '' }}" class="form-control form-control-sm"></td>
-          <td><input type="number" name="items[{{ $i }}][amount]" value="{{ $item['amount'] ?? '' }}" step="0.01" class="form-control form-control-sm text-end" required></td>
-          <td class="text-center"><button type="button" class="btn btn-sm btn-danger removeRow"><i class="fa fa-times"></i></button></td>
-        </tr>
-        @endforeach
-      </tbody>
-    </table>
-  </div>
+	<hr>
+	<div class="d-flex justify-content-between align-items-center mb-2">
+		<h6 class="m-0"><i class="fa fa-list"></i> Items</h6>
+		<button type="button" id="item_add" class="btn btn-sm btn-success"><i class="fa fa-plus"></i> Add Item</button>
+	</div>
+	<div id="items_wrap" class="@error('items') is-invalid @enderror">
 
-  <div class="col-md-3 ms-auto">
-    <label class="form-label">Subtotal</label>
-    <input type="number" step="0.01" name="subtotal" id="subtotal" value="{{ old('subtotal', $invoice->subtotal ?? 0) }}" class="form-control form-control-sm text-end" readonly>
-  </div>
-  <div class="col-md-3">
-    <label class="form-label">Tax</label>
-    <input type="number" step="0.01" name="tax" id="tax" value="{{ old('tax', $invoice->tax ?? 0) }}" class="form-control form-control-sm text-end">
-  </div>
-  <div class="col-md-3">
-    <label class="form-label">Total</label>
-    <input type="number" step="0.01" name="total" id="total" value="{{ old('total', $invoice->total ?? 0) }}" class="form-control form-control-sm text-end" readonly>
-  </div>
-</div>
+	</div>
+	@error('items')
+	<div class="invalid-feedback">
+		{{ $message }}
+	</div>
+	@enderror
+
+	<hr>
+	<div class="row justify-content-end">
+		<div class="col-sm-4">
+			<div class="input-group input-group-sm mb-2 @error('tax_rate_percent') has-error @enderror">
+				<span class="input-group-text">Tax Rate %</span>
+				<input type="number" step="0.1" name="tax_rate_percent" id="tax_rate_percent" value="{{ old('tax_rate_percent', $invoice->tax_rate_percent) }}" class="form-control form-control-sm @error('tax_rate_percent') is-invalid @enderror" min="0" max="100">
+			</div>
+
+			<div class="input-group input-group-sm mb-1">
+				<span class="input-group-text">Subtotal</span>
+				<input type="text" name="subtotal" value="{{ old('subtotal', $invoice->subtotal) }}" class="form-control text-end" readonly>
+			</div>
+			<div class="input-group input-group-sm mb-1">
+				<span class="input-group-text">Tax</span>
+				<input type="text" name="tax" value="{{ old('tax', $invoice->tax) }}" class="form-control text-end" readonly>
+			</div>
+			<div class="input-group input-group-sm">
+				<span class="input-group-text bg-success text-white fw-bold">Total</span>
+				<input type="text" name="total_amount" value="{{ old('total_amount', $invoice->total_amount) }}" class="form-control text-end fw-bold" readonly>
+			</div>
+		</div>
+	</div>
+
+

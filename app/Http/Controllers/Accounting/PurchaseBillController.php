@@ -71,6 +71,22 @@ class PurchaseBillController extends Controller
 
 	public function store(Request $request, JournalService $journalService)
 	{
+		$request->validate([
+			'date' => 'required',
+			'reference_no' => 'required|string|max:255',
+			'customer_id' => 'nullable',
+			'tax' => 'required|numeric',
+			'tax_rate_percent' => 'required|numeric',
+			'subtotal' => 'required|numeric',
+			'total_amount' => 'required|numeric',
+			'items' => 'required|array|min:1',
+			'items.*.account_id' => 'required|numeric',
+			'items.*.description' => 'nullable|string|max:500',
+			'items.*.quantity' => 'required|numeric',
+			'items.*.unit_price' => 'required|numeric',
+			'items.*.amount' => 'required|numeric',
+		]);
+
 		return DB::transaction(function () use ($request, $journalService) {
 			$bill = PurchaseBill::create($request->only([
 				'date','vendor_id','reference_no','subtotal','tax','total','total_amount'
@@ -107,6 +123,22 @@ class PurchaseBillController extends Controller
 
 	public function update(Request $request, PurchaseBill $purchase_bill, JournalService $journalService)
 	{
+		$request->validate([
+			'date' => 'required',
+			'reference_no' => 'required|string|max:255',
+			'customer_id' => 'nullable',
+			'tax' => 'required|numeric',
+			'tax_rate_percent' => 'required|numeric',
+			'subtotal' => 'required|numeric',
+			'total_amount' => 'required|numeric',
+			'items' => 'required|array|min:1',
+			'items.*.account_id' => 'required|numeric',
+			'items.*.description' => 'nullable|string|max:500',
+			'items.*.quantity' => 'required|numeric',
+			'items.*.unit_price' => 'required|numeric',
+			'items.*.amount' => 'required|numeric',
+		]);
+
 		return DB::transaction(function () use ($request, $purchase_bill, $journalService) {
 			$purchase_bill->update($request->only([
 				'date','vendor_id','reference_no','subtotal','tax','total','total_amount'

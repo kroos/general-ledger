@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sales_invoices', function (Blueprint $table) {
-            $table->decimal('total_amount', 15, 2)->default(0);
+            $table->decimal('total_amount', 15, 2)->default(0)->after('total');
         });
     }
 

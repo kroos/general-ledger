@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('purchase_bills', function (Blueprint $table) {
-            $table->decimal('total_amount', 15, 2)->default(0)->after('total');
+        Schema::table('sales_invoices', function (Blueprint $table) {
+            $table->decimal('tax_rate_percent', 15, 2)->default(0)->before('tax');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('purchase_bills', function (Blueprint $table) {
-            //
+        Schema::table('sales_invoices', function (Blueprint $table) {
+            $table->dropColumn('tax_rate_percent');
         });
     }
 };

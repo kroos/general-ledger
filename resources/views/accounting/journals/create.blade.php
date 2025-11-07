@@ -131,7 +131,7 @@ if (oldEntries.length > 0) {
 	oldEntries.forEach(function (entry, i) {
 		$("#entry_add").trigger('click'); // simulate add entry
 		const $entries = $("#entries").children().eq(i);
-		const $entry = $entries.find(`select[name="entries[${i}][account_id]"]`);
+		const $account = $entries.find(`select[name="entries[${i}][account_id]"]`);
 
 		if (entry.account_id) {
 			// Create option element manually
@@ -146,14 +146,14 @@ if (oldEntries.length > 0) {
 				const found = data.find(d => String(d.id) === String(entry.account_id));
 				if (found) {
 					const option = new Option(found.code +' '+ found.name, found.id, true, true);
-					$entry.empty().append(option).trigger('change');
+					$account.empty().append(option).trigger('change');
 				}
 			});
 		}
 
-		$entry.find(`input[name="entries[${i}][debit]"]`).val(entry.debit || '');
-		$entry.find(`input[name="entries[${i}][credit]"]`).val(entry.credit || '');
-		$entry.find(`input[name="entries[${i}][description]"]`).val(entry.description || '');
+		$entries.find(`input[name="entries[${i}][debit]"]`).val(entry.debit || '');
+		$entries.find(`input[name="entries[${i}][credit]"]`).val(entry.credit || '');
+		$entries.find(`input[name="entries[${i}][description]"]`).val(entry.description || '');
 	});
 }
 
