@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('purchase_bills', function (Blueprint $table) {
-            $table->decimal('tax_rate_percent', 15, 2)->default(0)->before('tax');
+            $table->decimal('tax_rate_percent', 15, 2)->after('subtotal')->default(0);
         });
     }
     /**

@@ -13,8 +13,8 @@ use Illuminate\Http\JsonResponse;
 // models
 use App\Models\Accounting\{
 	Journal, Account, Customer, LedgerType, Payment, Purchase, PurchaseBill, Sale, SalesInvoice, Supplier, TransactionRule,
-
 };
+use App\Models\ActivityLog;
 
 // load db facade
 use Illuminate\Database\Eloquent\Builder;
@@ -124,6 +124,21 @@ class JavaScriptSupportController extends Controller
 												$query->where('id', $request->id);
 											})
 											->orderBy('id')
+											->get();
+		return response()->json($values);
+	}
+
+	public function getActivityLogs(Request $request): JsonResponse
+	{
+		$values = ActivityLog::with('user')
+											->when($request->search, function($query) use ($request){
+												$query->where('model_type','LIKE','%'.$request->search.'%')
+												->orWhere('ip_address','LIKE','%'.$request->search.'%');
+											})
+											->when($request->id, function($query) use ($request){
+												$query->where('id', $request->id);
+											})
+											->orderBy('created_at', 'DESC')
 											->get();
 		return response()->json($values);
 	}

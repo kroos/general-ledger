@@ -4,12 +4,12 @@
 <div class="card border-primary">
   <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
     <h5 class="m-0">
-      <i class="fa fa-file-invoice"></i> Sales Invoice #{{ $invoice->id }}
+      <i class="fa fa-file-invoice"></i> Purchase Bills #{{ $bill->id }}
     </h5>
     <div>
-      @if($invoice->status === 'draft')
-        <button id="postBtn" data-id="{{ $invoice->id }}" class="btn btn-success btn-sm">
-          <i class="fa fa-check"></i> Post Invoice
+      @if($bill->status === 'draft')
+        <button id="postBtn" data-id="{{ $bill->id }}" class="btn btn-success btn-sm">
+          <i class="fa fa-check"></i> Post Purchase Bills
         </button>
       @else
         <span class="badge bg-success"><i class="fa fa-check-circle"></i> Posted</span>
@@ -23,14 +23,14 @@
   <div class="card-body">
     <div class="row mb-3">
       <div class="col-sm-4">
-        <strong>Date:</strong> {{ $invoice->date }}
+        <strong>Date:</strong> {{ $bill->date }}
       </div>
       <div class="col-sm-4">
-        <strong>Reference:</strong> {{ $invoice->reference_no ?? '-' }}
+        <strong>Reference:</strong> {{ $bill->reference_no ?? '-' }}
       </div>
       <div class="col-sm-4">
         <strong>Status:</strong>
-        <span class="badge bg-{{ $invoice->status == 'posted' ? 'success' : 'secondary' }}">{{ ucfirst($invoice->status) }}</span>
+        <span class="badge bg-{{ $bill->status == 'posted' ? 'success' : 'secondary' }}">{{ ucfirst($bill->status) }}</span>
       </div>
     </div>
 
@@ -46,7 +46,7 @@
         </tr>
       </thead>
       <tbody>
-        @foreach($invoice->items as $i => $item)
+        @foreach($bill->items as $i => $item)
         <tr>
           <td>{{ $i + 1 }}</td>
           <td>{{ $item->account->code ?? '-' }} - {{ $item->account->name ?? '-' }}</td>
@@ -58,13 +58,13 @@
         @endforeach
       </tbody>
       <tfoot>
-        <tr><th colspan="5" class="text-end">Subtotal</th><th class="text-end">{{ number_format($invoice->subtotal, 2) }}</th></tr>
-        <tr><th colspan="5" class="text-end">Tax</th><th class="text-end">{{ number_format($invoice->tax, 2) }}</th></tr>
-        <tr class="table-success"><th colspan="5" class="text-end">Total</th><th class="text-end">{{ number_format($invoice->total, 2) }}</th></tr>
+        <tr><th colspan="5" class="text-end">Subtotal</th><th class="text-end">{{ number_format($bill->subtotal, 2) }}</th></tr>
+        <tr><th colspan="5" class="text-end">Tax</th><th class="text-end">{{ number_format($bill->tax, 2) }}</th></tr>
+        <tr class="table-success"><th colspan="5" class="text-end">Total</th><th class="text-end">{{ number_format($bill->total_amount, 2) }}</th></tr>
       </tfoot>
     </table>
 
-    @if($invoice->journal)
+    @if($bill->journal)
     <hr>
     <h6><i class="fa fa-book"></i> Journal Entries</h6>
     <table class="table table-bordered table-sm">
@@ -77,7 +77,7 @@
         </tr>
       </thead>
       <tbody>
-        @foreach($invoice->journal->entries as $entry)
+        @foreach($bill->journal->entries as $entry)
         <tr>
           <td>{{ $entry->account->code ?? '-' }} - {{ $entry->account->name ?? '-' }}</td>
           <td>{{ $entry->memo ?? '-' }}</td>

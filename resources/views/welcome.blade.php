@@ -256,15 +256,15 @@ $("#dp").jqueryuiDatepicker({
 ///////////////////////////////////////////////////////////////////////////////////////////
 DataTable.datetime('D MMM YYYY');
 $('#table_id').DataTable({
-	'lengthMenu': [ [30, 60, 100, -1], [30, 60, 100, 'All'] ],
-	'columnDefs': [
-	{ type: 'date', 'targets': [4] },
+	lengthMenu: [ [30, 60, 100, -1], [30, 60, 100, 'All'] ],
+	columnDefs: [
+		{ type: 'date', 'targets': [4] },
 	],
-	'order': [[ 0, 'desc' ]],
-	'responsive': true,
-	'autoWidth': false,
-	// 'fixedHeader': true,
-	'dom': 'Bfrtip',
+	order: [[ 0, 'desc' ]],
+	responsive: true,
+	autoWidth: false,
+	// fixedHeader: true,
+	dom: 'Bfrtip',
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////

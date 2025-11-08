@@ -12,8 +12,6 @@ use Illuminate\View\View;
 // models
 use App\Models\ActivityLog;
 
-use App\Services\Support\DataTableResponse;
-
 // load db facade
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -54,29 +52,6 @@ class ActivityLogController extends Controller
 {
 	public function index(Request $request)
 	{
-		$query = ActivityLog::with('user')
-		->select(['id','event','model_type','model_id','user_id','changes','ip_address','user_agent','created_at']);
-
-		if ($response = DataTableResponse::from(
-			$request,
-			$query,
-			['event','model_type','model_id','ip_address','created_at'],
-			function ($log) {
-				return [
-					'id' => $log->id,
-					'event' => ucfirst($log->event),
-					'model' => class_basename($log->model_type).' #'.$log->model_id,
-					'user' => $log->user?->name ?? 'System',
-					'changes' => $log->changes ? json_encode($log->changes, JSON_PRETTY_PRINT) : '-',
-					'ip' => $log->ip_address,
-					'created_at' => $log->created_at->format('Y-m-d H:i:s'),
-					'action' => view('system.activity_logs._actions', compact('log'))->render(),
-				];
-			}
-		)) {
-			return $response;
-		}
-
 		return view('system.activity_logs.index');
 	}
 

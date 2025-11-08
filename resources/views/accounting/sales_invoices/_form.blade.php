@@ -1,7 +1,7 @@
 	<div class="row mb-2">
 		<div class="col-sm-4 @error('date') has-error @enderror">
 			<label class="form-label">Date:</label>
-			<input type="date" name="date" id="date" value="{{ old('date', \Carbon\Carbon::parse($invoice->date)->format('Y-m-d')) }}" class="form-control form-control-sm @error('date') is-invalid @enderror">
+			<input type="date" name="date" id="date" value="{{ old('date', \Carbon\Carbon::parse(@$invoice->date)->format('Y-m-d')) }}" class="form-control form-control-sm @error('date') is-invalid @enderror">
 			@error('date')
 			<div class="invalid-feedback">
 				{{ $message }}
@@ -10,7 +10,7 @@
 		</div>
 		<div class="col-sm-4 @error('reference_no') has-error @enderror">
 			<label class="form-label">Reference No:</label>
-			<input type="text" name="reference_no" id="reference_no" value="{{ old('reference_no', $invoice->reference_no) }}" class="form-control form-control-sm @error('reference_no') is-invalid @enderror" value="{{ old('reference_no') }}">
+			<input type="text" name="reference_no" id="reference_no" value="{{ old('reference_no', @$invoice->reference_no) }}" class="form-control form-control-sm @error('reference_no') is-invalid @enderror" value="{{ old('reference_no') }}">
 			@error('reference_no')
 			<div class="invalid-feedback">
 				{{ $message }}
@@ -47,20 +47,20 @@
 		<div class="col-sm-4">
 			<div class="input-group input-group-sm mb-2 @error('tax_rate_percent') has-error @enderror">
 				<span class="input-group-text">Tax Rate %</span>
-				<input type="number" step="0.1" name="tax_rate_percent" id="tax_rate_percent" value="{{ old('tax_rate_percent', $invoice->tax_rate_percent) }}" class="form-control form-control-sm @error('tax_rate_percent') is-invalid @enderror" min="0" max="100">
+				<input type="number" step="0.1" name="tax_rate_percent" id="tax_rate_percent" value="{{ old('tax_rate_percent', @$invoice->tax_rate_percent) }}" class="form-control form-control-sm @error('tax_rate_percent') is-invalid @enderror" min="0" max="100">
 			</div>
 
 			<div class="input-group input-group-sm mb-1">
 				<span class="input-group-text">Subtotal</span>
-				<input type="text" name="subtotal" value="{{ old('subtotal', $invoice->subtotal) }}" class="form-control text-end" readonly>
+				<input type="text" name="subtotal" value="{{ old('subtotal', @$invoice->subtotal) }}" class="form-control text-end" readonly>
 			</div>
 			<div class="input-group input-group-sm mb-1">
 				<span class="input-group-text">Tax</span>
-				<input type="text" name="tax" value="{{ old('tax', $invoice->tax) }}" class="form-control text-end" readonly>
+				<input type="text" name="tax" value="{{ old('tax', @$invoice->tax) }}" class="form-control text-end" readonly>
 			</div>
 			<div class="input-group input-group-sm">
 				<span class="input-group-text bg-success text-white fw-bold">Total</span>
-				<input type="text" name="total_amount" value="{{ old('total_amount', $invoice->total_amount) }}" class="form-control text-end fw-bold" readonly>
+				<input type="text" name="total_amount" value="{{ old('total_amount', @$invoice->total_amount) }}" class="form-control text-end fw-bold" readonly>
 			</div>
 		</div>
 	</div>

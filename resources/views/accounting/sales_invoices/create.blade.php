@@ -13,7 +13,8 @@
 				@include('accounting.sales_invoices._form')
 			</div>
 			<div class="card-footer text-end">
-				<button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Draft</button>
+				<button type="submit" name="action" value="draft" class="btn btn-secondary"><i class="fa fa-save"></i> Save Draft</button>
+				<button type="submit" name="action" value="post" class="btn btn-success"><i class="fa fa-check"></i> Post Now</button>
 				<a href="{{ route('accounting.sales-invoices.index') }}" class="btn btn-secondary">Cancel</a>
 			</div>
 		</div>

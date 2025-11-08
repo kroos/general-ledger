@@ -14,7 +14,8 @@
 				@include('accounting.sales_invoices._form', ['invoice' => $invoice])
 			</div>
 			<div class="card-footer text-end">
-				<button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Update & Repost</button>
+				<button type="submit" name="action" value="draft" class="btn btn-secondary"><i class="fa fa-save"></i> Update & Save Draft</button>
+				<button type="submit" name="action" value="post" class="btn btn-success"><i class="fa fa-check"></i> Update & Post Now</button>
 				<a href="{{ route('accounting.sales-invoices.index') }}" class="btn btn-secondary">Cancel</a>
 			</div>
 		</div>
@@ -157,9 +158,9 @@ $('#form').on('submit', function(e) {
 
 // restore from failed validation
 @php
-    $items = $invoice->items()->get(['account_id', 'description', 'quantity', 'unit_price', 'amount']);
-    $itemsArray = $items->toArray();
-    $oldItemsValue = old('items', $itemsArray);
+$items = $invoice->items()->get(['account_id', 'description', 'quantity', 'unit_price', 'amount']);
+$itemsArray = $items->toArray();
+$oldItemsValue = old('items', $itemsArray);
 @endphp
 
 const oldItems = @json($oldItemsValue);

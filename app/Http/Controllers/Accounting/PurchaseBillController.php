@@ -55,70 +55,85 @@ class PurchaseBillController extends Controller
 {
 	public function index(Request $request)
 	{
-		if ($request->ajax()) {
-			$bills = PurchaseBill::withCount('items')->latest()->get();
-			return response()->json(['data' => $bills]);
-		}
-
 		return view('accounting.purchase_bills.index');
 	}
 
 	public function create()
 	{
-		$accounts = Account::orderBy('code')->pluck('name', 'id');
-		return view('accounting.purchase_bills.create', compact('accounts'));
+		return view('accounting.purchase_bills.create');
 	}
 
 	public function store(Request $request, JournalService $journalService)
 	{
 		$request->validate([
-			'date' => 'required',
+			'date' => 'required|date',
 			'reference_no' => 'required|string|max:255',
-			'customer_id' => 'nullable',
+			'supplier_id' => 'nullable',
 			'tax' => 'required|numeric',
 			'tax_rate_percent' => 'required|numeric',
 			'subtotal' => 'required|numeric',
 			'total_amount' => 'required|numeric',
 			'items' => 'required|array|min:1',
-			'items.*.account_id' => 'required|numeric',
+			'items.*.account_id' => 'required|numeric|exists:accounts,id',
 			'items.*.description' => 'nullable|string|max:500',
-			'items.*.quantity' => 'required|numeric',
-			'items.*.unit_price' => 'required|numeric',
-			'items.*.amount' => 'required|numeric',
+			'items.*.quantity' => 'required|numeric|min:0',
+			'items.*.unit_price' => 'required|numeric|min:0',
+			'items.*.amount' => 'required|numeric|min:0',
 		]);
 
-		return DB::transaction(function () use ($request, $journalService) {
-			$bill = PurchaseBill::create($request->only([
-				'date','vendor_id','reference_no','subtotal','tax','total','total_amount'
-			]));
+    $action = $request->input('action', 'draft'); // "draft" or "post"
 
-			foreach ($request->items ?? [] as $item) {
-				$bill->items()->create($item);
-			}
+    try {
+    	DB::beginTransaction();
 
-						// Auto-create journal
-			$journal = $journalService->recordBill($bill);
-			$bill->update(['journal_id' => $journal->id]);
+			// Save base bill first
+    	$bill = PurchaseBill::create($request->only([
+    		'date','supplier_id','reference_no','subtotal','tax','total','total_amount','tax_rate_percent',
+    	]));
+        // Create items
+    	foreach ($request->items ?? [] as $item) {
+    		$bill->items()->create($item);
+    	}
+    	if ($action === 'draft') {
+            // Just save as draft — no posting
+    		$bill->update(['status' => 'draft']);
+    		DB::commit();
 
-			return redirect()->route('accounting.purchase-bills.index')
-			->with('success', 'Purchase Bill posted successfully.');
-		});
-	}
+    		return redirect()->route('accounting.purchase-bills.index')->with('success', 'Purchase Bill saved as draft successfully.');
+    	}
+			// Otherwise — attempt to post immediately
+    	$journal = $journalService->recordBill($bill);
+    	$bill->update([
+    		'journal_id' => $journal->id,
+    		'status' => 'posted',
+    	]);
+    	DB::commit();
+    	return redirect()->route('accounting.purchase-bills.index')->with('success', 'Purchase Bill posted successfully.');
+    }
+
+    // Handle expected "unbalanced" domain errors
+    catch (\DomainException $e) {
+    	DB::rollBack();
+    	return back()->withInput()->with('danger', $e->getMessage());
+    }
+
+    // Handle other unexpected exceptions
+    catch (\Throwable $e) {
+    	DB::rollBack();
+    	report($e);
+    	return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
+    }
+  }
+
 
 	public function show(PurchaseBill $purchase_bill)
 	{
-		return view('accounting.purchase_bills.show', [
-			'bill' => $purchase_bill->load('items.account', 'journal.entries.account')
-		]);
+		return view('accounting.purchase_bills.show', ['bill' => $purchase_bill->load('items.account', 'journal.entries.account')]);
 	}
 
 	public function edit(PurchaseBill $purchase_bill)
 	{
-		$accounts = Account::orderBy('code')->pluck('name', 'id');
-		return view('accounting.purchase_bills.edit', [
-			'bill' => $purchase_bill->load('items'),
-			'accounts' => $accounts
-		]);
+		return view('accounting.purchase_bills.edit', ['bill' => $purchase_bill->load('items')]);
 	}
 
 	public function update(Request $request, PurchaseBill $purchase_bill, JournalService $journalService)
@@ -126,7 +141,7 @@ class PurchaseBillController extends Controller
 		$request->validate([
 			'date' => 'required',
 			'reference_no' => 'required|string|max:255',
-			'customer_id' => 'nullable',
+			'supplier_id' => 'nullable',
 			'tax' => 'required|numeric',
 			'tax_rate_percent' => 'required|numeric',
 			'subtotal' => 'required|numeric',
@@ -139,23 +154,64 @@ class PurchaseBillController extends Controller
 			'items.*.amount' => 'required|numeric',
 		]);
 
-		return DB::transaction(function () use ($request, $purchase_bill, $journalService) {
+		try {
+			DB::beginTransaction();
+
 			$purchase_bill->update($request->only([
-				'date','vendor_id','reference_no','subtotal','tax','total','total_amount'
+				'date', 'supplier_id', 'reference_no', 'subtotal', 'tax', 'total', 'total_amount', 'tax_rate_percent'
 			]));
 
+        // Recreate items
 			$purchase_bill->items()->delete();
 			foreach ($request->items ?? [] as $item) {
 				$purchase_bill->items()->create($item);
 			}
 
-			if ($purchase_bill->journal) {
-				$journalService->rebuildJournal($purchase_bill->journal, $purchase_bill->journal->entries->toArray());
+        // Determine action
+			$action = $request->input('action', 'draft');
+
+        // Handle posting or draft saving
+			if ($action === 'post') {
+            // Try to rebuild and post the journal
+				$journal = $journalService->recordBill($purchase_bill);
+				$purchase_bill->update([
+					'journal_id' => $journal->id,
+					'status' => 'posted',
+				]);
+				$message = 'Purchase Bill updated and posted successfully.';
+			} else {
+            // Draft save, don't validate balancing
+				$journal = $journalService->createJournal(
+					PurchaseBill::class,
+					$purchase_bill->id,
+					$purchase_bill->items->map(fn($i) => [
+						'account_id' => $i->account_id,
+						'debit' => $i->amount,
+						'credit' => 0,
+						'memo' => $i->description,
+					])->toArray(),
+					'draft'
+				);
+				$purchase_bill->update([
+					'journal_id' => $journal->id,
+					'status' => 'draft',
+				]);
+				$message = 'Purchase Bill updated and saved as draft.';
 			}
 
-			return redirect()->route('accounting.purchase-bills.index')
-			->with('success', 'Purchase Bill updated and journal rebuilt.');
-		});
+			DB::commit();
+
+			return redirect()->route('accounting.purchase-bills.index')->with('success', $message);
+		}
+		catch (\DomainException $e) {
+			DB::rollBack();
+			return back()->withInput()->withErrors(['msg' => $e->getMessage()]);
+		}
+		catch (\Throwable $e) {
+			DB::rollBack();
+			report($e);
+			return back()->withInput()->withErrors(['msg' => 'Unexpected error: ' . $e->getMessage()]);
+		}
 	}
 
 	public function destroy(PurchaseBill $purchase_bill)

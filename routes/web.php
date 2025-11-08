@@ -112,7 +112,7 @@ Route::prefix('accounting')->name('accounting.')->group(function () {
 	Route::resource('sales-invoices', SalesInvoiceController::class);
 	Route::post('sales-invoices/{invoice}/post', [SalesInvoiceController::class, 'post'])->name('sales-invoices.post');
 
-	Route::resource('accounting/purchase-bills', \App\Http\Controllers\Accounting\PurchaseBillController::class);
+	Route::resource('purchase-bills', PurchaseBillController::class);
 	Route::post('purchase-bills/{bill}/post', [PurchaseBillController::class, 'post'])->name('purchase-bills.post');
 });
 
