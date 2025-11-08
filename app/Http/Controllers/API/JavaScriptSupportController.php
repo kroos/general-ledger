@@ -143,4 +143,19 @@ class JavaScriptSupportController extends Controller
 		return response()->json($values);
 	}
 
+	public function getPayments(Request $request): JsonResponse
+	{
+		$values = Payment::with('account')
+											->when($request->search, function($query) use ($request){
+												$query->where('type','LIKE','%'.$request->search.'%')
+												->orWhere('status','LIKE','%'.$request->search.'%');
+											})
+											->when($request->id, function($query) use ($request){
+												$query->where('id', $request->id);
+											})
+											->orderBy('created_at', 'DESC')
+											->get();
+		return response()->json($values);
+	}
+
 }

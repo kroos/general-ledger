@@ -58,11 +58,6 @@ class PaymentController extends Controller
 {
 	public function index(Request $request)
 	{
-		if ($request->ajax()) {
-			$payments = Payment::with(['account'])->latest()->get();
-			return response()->json(['data' => $payments]);
-		}
-
 		return view('accounting.payments.index');
 	}
 
@@ -102,7 +97,7 @@ class PaymentController extends Controller
 
 	public function edit(Payment $payment)
 	{
-		$accounts = Account::orderBy('code')->pluck('name', 'id');
+		$accounts = Account::orderBy('code')->get(['id', 'code', 'name']);
 		$salesInvoices = SalesInvoice::select('id', 'reference_no', 'total_amount')->get();
 		$purchaseBills = PurchaseBill::select('id', 'reference_no', 'total_amount')->get();
 

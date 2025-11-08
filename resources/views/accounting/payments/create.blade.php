@@ -4,7 +4,16 @@
 <div class="col-sm-12">
 	<form method="POST" action="{{ route('accounting.payments.store') }}" id="form" autocomplete="off">
 		@csrf
-		@include('accounting.payments._form')
+		<div class="card border-success">
+			<div class="card-header bg-success text-white">
+				<i class="fa fa-credit-card"></i> New Payment
+			</div>
+			@include('accounting.payments._form')
+			<div class="card-footer text-end">
+				<button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Record Payment</button>
+				<a href="{{ route('accounting.payments.index') }}" class="btn btn-secondary">Cancel</a>
+			</div>
+		</div>
 	</form>
 </div>
 @endsection
@@ -20,7 +29,7 @@ $('.select2').select2({
 
 
 $('#account_id').select2({
-	placeholder: 'Select Account',
+	placeholder: 'Please choose',
 	theme:'bootstrap-5',
 	width: '100%',
 	allowClear: true,

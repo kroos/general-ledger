@@ -55,4 +55,5 @@ Route::controller(JavaScriptSupportController::class)->group(function () {
 	Route::get('/getSalesInvoices', 'getSalesInvoices')->name('getSalesInvoices');
 	Route::get('/getPurchaseBills', 'getPurchaseBills')->name('getPurchaseBills');
 	Route::get('/getActivityLogs', 'getActivityLogs')->name('getActivityLogs');
+	Route::get('/getPayments', 'getPayments')->name('getPayments');
 });
