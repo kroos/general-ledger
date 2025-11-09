@@ -19,103 +19,103 @@
 @endsection
 
 @section('js')
-$('.select2').select2({
-	placeholder: 'Please choose',
-	theme:'bootstrap-5',
-	width: '100%',
-	allowClear: true,
-	closeOnSelect: true,
-});
+$(document).ready(function () {
+	let invoice = `
+		<div id="select" class="col-sm-12 source-select @error('source_id') has-error @enderror">
+			<label for="source_id" class="col-form-label">Apply to Sales Invoice</label>
+			<select name="source_id" id="source_id" class="form-select form-select-sm select2 @error('source_id') is-invalid @enderror">
+				<option value="">Select invoice...</option>
+				@foreach($salesInvoices as $inv)
+				<option value="{{ $inv->id }}" data-source_type="App\\Models\\Accounting\\SalesInvoice">
+					Invoice #{{ $inv->reference_no }} - RM {{ number_format($inv->total_amount, 2) }}
+				</option>
+				@endforeach
+			</select>
+			<input type="hidden" name="source_type" value="App\\Models\\Accounting\\SalesInvoice">
+		</div>
+	`;
 
+	let payment = `
+		<div id="select" class="col-sm-12 source-select @error('source_id') has-error @enderror">
+			<label for="source" class="col-form-label">Apply to Purchase Bill</label>
+			<select name="source_id" id="source" class="form-select form-select-sm select2 @error('source_id') is-invalid @enderror">
+				<option value="">Select bill...</option>
+				@foreach($purchaseBills as $bill)
+				<option value="{{ $bill->id }}" data-source_type="App\\Models\\Accounting\\PurchaseBill">
+					Bill #{{ $bill->reference_no }} - RM {{ number_format($bill->total_amount, 2) }}
+				</option>
+				@endforeach
+			</select>
+			<input type="hidden" name="source_type" value="App\\Models\\Accounting\\PurchaseBill">
+		</div>
+	`;
 
-$('#account_id').select2({
-	placeholder: 'Please choose',
-	theme:'bootstrap-5',
-	width: '100%',
-	allowClear: true,
-	closeOnSelect: true,
-	ajax: {
-		url: '{{ route('getAccounts') }}', // same API you showed earlier
-		type: 'GET',
-		dataType: 'json',
-		delay: 250, // prevents excessive requests while typing
-		data: function (params) {
-			return {
-				_token: '{{ csrf_token() }}',
-				search: params.term // optional if you want filtering
-			};
-		},
-		processResults: function (data) {
-			// API returns plain array, so map it to Select2 format
-			return {
-				results: data.map(item => ({
-					id: item.id,
-					text: item.code + ' ' + item.name
-				}))
-			};
+	$('#type').on('change', function () {
+		const val = $(this).val();
+		$('#wrap').empty();
+
+		if (val == 'receive') {
+			$('#wrap').append(invoice);
+		} else if (val == 'make') {
+			$('#wrap').append(payment);
 		}
+	});
+
+	// --- handle old('type') after validation fail ---
+	const oldType = "{{ old('type') }}";
+	if (oldType === 'receive') {
+		$('#wrap').append(invoice);
+		$('#type').val('receive');
+	} else if (oldType === 'make') {
+		$('#wrap').append(payment);
+		$('#type').val('make');
 	}
-});
-@if(old('account_id'))
-	$.ajax({
-		url: '{{ route('getAccounts') }}',
-		type: 'GET',
-		data: {
-			search: "{{ old('account_id')}}",
-			_token: '{{ csrf_token() }}',
-		},
-		success: function (response) {
-			const account = Array.isArray(response) ? response[0] : response;
-			if (account) {
-				const option = new Option(account.code + ' ' + account.name, account.id, true, true);
-				$('#account_id').append(option).trigger('change');
+	$('select[name="source_id"]').val('{{ old('source_id') }}');
+
+	$('#account_id').select2({
+		placeholder: 'Please choose',
+		theme:'bootstrap-5',
+		width: '100%',
+		allowClear: true,
+		closeOnSelect: true,
+		ajax: {
+			url: '{{ route('getAccounts') }}', // same API you showed earlier
+			type: 'GET',
+			dataType: 'json',
+			delay: 250, // prevents excessive requests while typing
+			data: function (params) {
+				return {
+					_token: '{{ csrf_token() }}',
+					search: params.term // optional if you want filtering
+				};
+			},
+			processResults: function (data) {
+				// API returns plain array, so map it to Select2 format
+				return {
+					results: data.map(item => ({
+						id: item.id,
+						text: item.code + ' ' + item.name
+					}))
+				};
 			}
 		}
 	});
-@endif
-
-////////////////////////////////////////////////////////////////////////////////////////////
-// restore after fail form process
-
-const oldEntries = @json(old('entries', []));
-console.log(oldEntries);
-
-// === Restore old SKILLS ===
-if (oldEntries.length > 0) {
-	oldEntries.forEach(function (entry, i) {
-		$("#entry_add").trigger('click'); // simulate add entry
-		const $entries = $("#entries").children().eq(i);
-		const $entry = $entries.find(`select[name="entries[${i}][account_id]"]`);
-
-		if (entry.account_id) {
-			// Create option element manually
-			const entryOption = new Option('Loading...', entry.account_id, true, true);
-			$entry.append(entryOption).trigger('change');
-
-			// Fetch actual country name asynchronously
-			$.ajax({
-				url: '{{ route('getAccounts') }}',
-				dataType: 'json'
-			}).then(data => {
-				const found = data.find(d => String(d.id) === String(entry.account_id));
-				if (found) {
-					const option = new Option(found.code +' '+ found.name, found.id, true, true);
-					$entry.empty().append(option).trigger('change');
+	@if(old('account_id'))
+		$.ajax({
+			url: '{{ route('getAccounts') }}',
+			type: 'GET',
+			data: {
+				id: "{{ old('account_id')}}",
+				_token: '{{ csrf_token() }}',
+			},
+			success: function (response) {
+				const account = Array.isArray(response) ? response[0] : response;
+				if (account) {
+					const option = new Option(account.code + ' ' + account.name, account.id, true, true);
+					$('#account_id').append(option).trigger('change');
 				}
-			});
-		}
-
-		$entry.find(`input[name="entries[${i}][debit]"]`).val(entry.debit || '');
-		$entry.find(`input[name="entries[${i}][credit]"]`).val(entry.credit || '');
-		$entry.find(`input[name="entries[${i}][description]"]`).val(entry.description || '');
-	});
-}
-
-$('#type').on('change', function() {
-	const val = $(this).val();
-	$('.source-select').addClass('d-none');
-	if (val === 'receive') $('#invoice_select_wrap').removeClass('d-none');
-	if (val === 'make') $('#bill_select_wrap').removeClass('d-none');
+			}
+		});
+	@endif
 });
-
 @endsection

@@ -100,8 +100,9 @@ class PaymentController extends Controller
 		$accounts = Account::orderBy('code')->get(['id', 'code', 'name']);
 		$salesInvoices = SalesInvoice::select('id', 'reference_no', 'total_amount')->get();
 		$purchaseBills = PurchaseBill::select('id', 'reference_no', 'total_amount')->get();
+		$sourceTypes = PurchaseBill::select('id', 'reference_no', 'total_amount')->get();
 
-		return view('accounting.payments.edit', compact('payment','accounts','salesInvoices','purchaseBills'));
+		return view('accounting.payments.edit', compact('payment','accounts','salesInvoices','purchaseBills', 'sourceTypes'));
 	}
 
 	public function update(Request $request, Payment $payment, JournalService $journalService)
