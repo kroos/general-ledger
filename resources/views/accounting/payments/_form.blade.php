@@ -5,8 +5,8 @@
 			<label for="type" class="col-form-label">Type</label>
 			<select name="type" id="type" class="form-select form-select-sm select2 @error('type') is-invalid @enderror">
 				<option value="">Please Choose</option>
-				<option value="receive" {{ (old('type', @$payment->type)=='receive')?'selected':NULL }}>Receive Payment (Customer)</option>
-				<option value="make" {{ (old('type', @$payment->type)=='make')?'selected':NULL }}>Make Payment (Supplier)</option>
+				<option value="receive" {{ (old('type', @$payment->type)=='receive')?'selected="selected"':NULL }}>Receive Payment (Customer)</option>
+				<option value="make" {{ (old('type', @$payment->type)=='make')?'selected="selected"':NULL }}>Make Payment (Supplier)</option>
 			</select>
 			@error('type')
 			<div class="invalid-feedback">

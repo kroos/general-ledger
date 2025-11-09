@@ -72,28 +72,51 @@ class PaymentController extends Controller
 
 	public function store(Request $request, JournalService $journalService)
 	{
-		$validated = $request->validate([
+		$request->validate([
+			'date' => 'required|date',
+			'reference_no' => 'required|string|max:255',
 			'type' => 'required',
-			'date' => 'required',
-			'reference_no' => 'nullable',
-			'amount' => 'required',
-			'account_id' => 'required',
-			'source_type' => 'required',
-			'source_id' => 'required',
+			'account_id' => 'required|exists:accounts,id',
+			'amount' => 'required|numeric|min:0.01',
 		]);
 
-		return DB::transaction(function () use ($request, $journalService) {
-			$payment = Payment::create($request->only([
-				'type','date','reference_no','amount','account_id','source_type','source_id'
-			]));
+		try {
+			DB::beginTransaction();
+
+			$payment = Payment::create($request->only(['date', 'reference_no', 'type', 'account_id', 'amount']));
 
 			$journal = $journalService->recordPayment($payment);
-			$payment->update(['journal_id' => $journal->id]);
 
-			return redirect()->route('accounting.payments.index')
-			->with('success', 'Payment recorded and journal created.');
-		});
+			$payment->update([
+				'journal_id' => $journal->id,
+				'status' => 'posted',
+			]);
+
+			DB::commit();
+			return redirect()->route('accounting.payments.index')->with('success', 'Payment posted successfully.');
+		} catch (\DomainException $e) {
+			DB::rollBack();
+			return back()->withInput()->with('danger', $e->getMessage());
+		} catch (\Throwable $e) {
+			DB::rollBack();
+			report($e);
+			return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
+		}
 	}
+
+	public function show(Payment $payment)
+	{
+		$payment->load([
+			'account',
+			'journal.entries.account',
+			'source' => function ($query) {
+				$query->with('items.account');
+			}
+		]);
+
+		return view('accounting.payments.show', compact('payment'));
+	}
+
 
 	public function edit(Payment $payment)
 	{
@@ -107,23 +130,45 @@ class PaymentController extends Controller
 
 	public function update(Request $request, Payment $payment, JournalService $journalService)
 	{
-		return DB::transaction(function () use ($request, $payment, $journalService) {
-			$payment->update($request->only([
-				'type','date','reference_no','amount','account_id','source_type','source_id'
-			]));
+		$request->validate([
+			'date' => 'required|date',
+			'reference_no' => 'required|string|max:255',
+			'type' => 'required',
+			'account_id' => 'required|exists:accounts,id',
+			'amount' => 'required|numeric|min:0.01',
+		]);
 
-			if ($payment->journal) {
-				$journalService->rebuildJournal($payment->journal, $payment->journal->entries->toArray());
-			}
+		try {
+			DB::beginTransaction();
 
-			return redirect()->route('accounting.payments.index')
-			->with('success', 'Payment updated and journal rebuilt.');
-		});
+			$payment->update($request->only(['date', 'reference_no', 'type', 'account_id', 'amount']));
+
+			$journal = $journalService->recordPayment($payment);
+
+			$payment->update([
+				'journal_id' => $journal->id,
+				'status' => 'posted',
+			]);
+
+			DB::commit();
+			return redirect()->route('accounting.payments.index')->with('success', 'Payment updated and posted successfully.');
+		} catch (\DomainException $e) {
+			DB::rollBack();
+			return back()->withInput()->with('danger', $e->getMessage());
+		} catch (\Throwable $e) {
+			DB::rollBack();
+			report($e);
+			return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
+		}
 	}
 
 	public function destroy(Payment $payment)
 	{
-		$payment->delete();
-		return response()->json(['success' => true]);
+		try {
+			$payment->delete();
+			return response()->json(['success' => true]);
+		} catch (\Throwable $e) {
+			return response()->json(['success' => false, 'error' => $e->getMessage()]);
+		}
 	}
 }

@@ -55,10 +55,10 @@ class GeneralLedgerController extends Controller
 		if ($request->ajax()) {
 			$accountId = $request->account_id;
 			$entries = JournalEntry::whereHas('journal', fn($q) => $q->where('status', 'posted'))
-			->where('account_id', $accountId)
-			->orderBy('id')
-			->with('journal')
-			->get(['id','journal_id','debit','credit','description']);
+									->where('account_id', $accountId)
+									->orderBy('id')
+									->with('journal')
+									->get(['id','journal_id','debit','credit','description']);
 
 			$running = 0;
 			$data = [];

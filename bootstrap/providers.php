@@ -5,4 +5,5 @@ return [
 
     // Custom Providers
     App\Extensions\Helper\HelperServiceProvider::class,
+    App\Extensions\AccountingServiceProvider::class,
 ];

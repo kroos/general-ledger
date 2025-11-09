@@ -74,68 +74,50 @@ class SalesInvoiceController extends Controller
 			'subtotal' => 'required|numeric',
 			'total_amount' => 'required|numeric',
 			'items' => 'required|array|min:1',
-			'items.*.account_id' => 'required|numeric|exists:accounts,id',
+			'items.*.account_id' => 'required|exists:accounts,id',
 			'items.*.description' => 'nullable|string|max:500',
 			'items.*.quantity' => 'required|numeric|min:0',
 			'items.*.unit_price' => 'required|numeric|min:0',
 			'items.*.amount' => 'required|numeric|min:0',
 		]);
 
-    $action = $request->input('action', 'draft'); // "draft" or "post"
+		$action = $request->input('action', 'draft');
 
-    try {
-    	DB::beginTransaction();
+		try {
+			DB::beginTransaction();
 
-			// Save base bill first
-    	$invoice = SalesInvoice::create($request->only([
-    		'date','supplier_id','reference_no','subtotal','tax','total','total_amount','tax_rate_percent',
-    	]));
-        // Create items
-    	foreach ($request->items ?? [] as $item) {
-    		$invoice->items()->create($item);
-    	}
-    	if ($action === 'draft') {
-            // Just save as draft — no posting
-    		$invoice->update(['status' => 'draft']);
-    		DB::commit();
+			$invoice = SalesInvoice::create($request->only([
+				'date', 'supplier_id', 'reference_no', 'subtotal', 'tax', 'total', 'total_amount', 'tax_rate_percent',
+			]));
 
-    		return redirect()->route('accounting.sales-invoices.index')->with('success', 'Sales Invoice saved as draft successfully.');
-    	}
-			// Otherwise — attempt to post immediately
-    	$journal = $journalService->recordInvoice($invoice);
-    	$invoice->update([
-    		'journal_id' => $journal->id,
-    		'status' => 'posted',
-    	]);
-    	DB::commit();
-    	return redirect()->route('accounting.sales-invoices.index')->with('success', 'Sales Invoice posted successfully.');
-    }
+			foreach ($request->items ?? [] as $item) {
+				$invoice->items()->create($item);
+			}
 
-    // Handle expected "unbalanced" domain errors
-    catch (\DomainException $e) {
-    	DB::rollBack();
-    	return back()->withInput()->with('danger', $e->getMessage());
-    }
+			if ($action === 'draft') {
+				$invoice->update(['status' => 'draft']);
+				DB::commit();
+				return redirect()->route('accounting.sales-invoices.index')->with('success', 'Sales Invoice saved as draft successfully.');
+			}
 
-    // Handle other unexpected exceptions
-    catch (\Throwable $e) {
-    	DB::rollBack();
-    	report($e);
-    	return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
-    }
-  }
+			$journal = $journalService->recordInvoice($invoice);
+			$invoice->update([
+				'journal_id' => $journal->id,
+				'status' => 'posted',
+			]);
 
-	public function show(SalesInvoice $sales_invoice)
-	{
-		return view('accounting.sales_invoices.show', ['invoice' => $sales_invoice->load('items.account', 'journal.entries.account')]);
+			DB::commit();
+			return redirect()->route('accounting.sales-invoices.index')->with('success', 'Sales Invoice posted successfully.');
+		} catch (\DomainException $e) {
+			DB::rollBack();
+			return back()->withInput()->with('danger', $e->getMessage());
+		} catch (\Throwable $e) {
+			DB::rollBack();
+			report($e);
+			return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
+		}
 	}
 
-	public function edit(SalesInvoice $sales_invoice)
-	{
-		return view('accounting.sales_invoices.edit', ['invoice' => $sales_invoice->load('items')]);
-	}
-
-	// public function update(Request $request, PurchaseBill $purchase_bill, JournalService $journalService)
 	public function update(Request $request, SalesInvoice $sales_invoice, JournalService $journalService)
 	{
 		$request->validate([
@@ -161,56 +143,31 @@ class SalesInvoiceController extends Controller
 				'date', 'supplier_id', 'reference_no', 'subtotal', 'tax', 'total', 'total_amount', 'tax_rate_percent'
 			]));
 
-        // Recreate items
 			$sales_invoice->items()->delete();
 			foreach ($request->items ?? [] as $item) {
 				$sales_invoice->items()->create($item);
 			}
 
-        // Determine action
 			$action = $request->input('action', 'draft');
 
-        // Handle posting or draft saving
 			if ($action === 'post') {
-            // Try to rebuild and post the journal
-				$journal = $journalService->recordBill($sales_invoice);
-				$sales_invoice->update([
-					'journal_id' => $journal->id,
-					'status' => 'posted',
-				]);
-				$message = 'Purchase Bill updated and posted successfully.';
+				$journal = $journalService->recordInvoice($sales_invoice);
+				$sales_invoice->update(['journal_id' => $journal->id, 'status' => 'posted']);
+				$msg = 'Sales Invoice updated and posted successfully.';
 			} else {
-            // Draft save, don't validate balancing
-				$journal = $journalService->createJournal(
-					SalesInvoice::class,
-					$sales_invoice->id,
-					$sales_invoice->items->map(fn($i) => [
-						'account_id' => $i->account_id,
-						'debit' => $i->amount,
-						'credit' => 0,
-						'memo' => $i->description,
-					])->toArray(),
-					'draft'
-				);
-				$sales_invoice->update([
-					'journal_id' => $journal->id,
-					'status' => 'draft',
-				]);
-				$message = 'Purchase Bill updated and saved as draft.';
+				$msg = 'Sales Invoice updated and saved as draft.';
+				$sales_invoice->update(['status' => 'draft']);
 			}
 
 			DB::commit();
-
-			return redirect()->route('accounting.sales-invoices.index')->with('success', $message);
-		}
-		catch (\DomainException $e) {
+			return redirect()->route('accounting.sales-invoices.index')->with('success', $msg);
+		} catch (\DomainException $e) {
 			DB::rollBack();
-			return back()->withInput()->withErrors(['msg' => $e->getMessage()]);
-		}
-		catch (\Throwable $e) {
+			return back()->withInput()->with('danger', $e->getMessage());
+		} catch (\Throwable $e) {
 			DB::rollBack();
 			report($e);
-			return back()->withInput()->withErrors(['msg' => 'Unexpected error: ' . $e->getMessage()]);
+			return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
 		}
 	}
 

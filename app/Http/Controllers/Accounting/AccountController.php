@@ -52,80 +52,60 @@ class AccountController extends Controller
 {
 	public function index(Request $request)
 	{
-		if ($request->ajax()) {
-			$accounts = $this->buildAccountTree();
-			return response()->json(['data' => $accounts]);
-		}
-
 		return view('accounting.accounts.index');
 	}
 
 	public function create()
 	{
-		$parents = Account::orderBy('code')->pluck('name', 'id');
-		return view('accounting.accounts.create', compact('parents'));
+		return view('accounting.accounts.create');
 	}
 
 	public function store(Request $request)
 	{
-		$validated = $request->validate([
-			'code' => 'required|string|max:20|unique:accounts,code',
+		$request->validate([
+			'code' => 'required|string|max:255|unique:accounts,code',
 			'name' => 'required|string|max:255',
-			'type' => 'required|in:asset,liability,equity,income,expense',
-			'parent_id' => 'nullable|exists:accounts,id',
-			'description' => 'nullable|string|max:500',
+			'type' => 'required|string',
 		]);
 
-		DB::transaction(function () use ($validated) {
-			Account::create($validated);
-		});
-
-		return redirect()->route('accounts.index')->with('success', 'Account created successfully.');
+		try {
+			Account::create($request->only(['code', 'name', 'type']));
+			return redirect()->route('accounts.index')->with('success', 'Account created successfully.');
+		} catch (\Throwable $e) {
+			report($e);
+			return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
+		}
 	}
 
 	public function edit(Account $account)
 	{
-		$parents = Account::where('id', '!=', $account->id)->orderBy('code')->pluck('name', 'id');
-		return view('accounting.accounts.edit', compact('account', 'parents'));
+		return view('accounting.accounts.edit', compact('account'));
 	}
 
 	public function update(Request $request, Account $account)
 	{
-		$validated = $request->validate([
-			'code' => 'required|string|max:20|unique:accounts,code,' . $account->id,
+		$request->validate([
+			'code' => 'required|string|max:255|unique:accounts,code,' . $account->id,
 			'name' => 'required|string|max:255',
-			'type' => 'required|in:asset,liability,equity,income,expense',
-			'parent_id' => 'nullable|exists:accounts,id',
-			'description' => 'nullable|string|max:500',
+			'type' => 'required|string',
 		]);
 
-		DB::transaction(function () use ($account, $validated) {
-			$account->update($validated);
-		});
-
-		return redirect()->route('accounts.index')->with('success', 'Account updated successfully.');
+		try {
+			$account->update($request->only(['code', 'name', 'type']));
+			return redirect()->route('accounts.index')->with('success', 'Account updated successfully.');
+		} catch (\Throwable $e) {
+			report($e);
+			return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
+		}
 	}
 
 	public function destroy(Account $account)
 	{
-		$account->delete();
-		return response()->json(['success' => true]);
-	}
-
-	protected function buildAccountTree($parentId = null, $depth = 0)
-	{
-		$accounts = \App\Models\Accounting\Account::where('parent_id', $parentId)
-		->orderBy('code')
-		->get();
-
-		$result = [];
-		foreach ($accounts as $acc) {
-			$acc->indent_level = $depth;
-			$result[] = $acc;
-			$result = array_merge($result, $this->buildAccountTree($acc->id, $depth + 1));
+		try {
+			$account->delete();
+			return response()->json(['success' => true]);
+		} catch (\Throwable $e) {
+			return response()->json(['success' => false, 'error' => $e->getMessage()]);
 		}
-		return $result;
 	}
-
-
 }

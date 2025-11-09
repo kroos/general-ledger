@@ -58,13 +58,11 @@ class JournalController extends Controller
 		return view('accounting.journals.index');
 	}
 
-	/** Show create form */
 	public function create()
 	{
 		return view('accounting.journals.create');
 	}
 
-	/** Store draft or post journal manually */
 	public function store(Request $request)
 	{
 		$data = $request->validate([
@@ -78,9 +76,9 @@ class JournalController extends Controller
 			'entries.*.description' => 'nullable|string',
 		]);
 
-		DB::beginTransaction();
-
 		try {
+			DB::beginTransaction();
+
 			$journal = Journal::create([
 				'date' => $data['date'],
 				'ledger_type_id' => $data['ledger_type_id'],
@@ -97,68 +95,58 @@ class JournalController extends Controller
 				]);
 			}
 
-			$totalDebit = $journal->entries->sum('debit');
-			$totalCredit = $journal->entries->sum('credit');
-
 			if ($request->has('post_now')) {
 				if (!$journal->isBalanced()) {
-					DB::rollBack();
-					return back()
-					->withInput()
-					->withErrors(['msg' => 'Cannot post unbalanced journal. Please ensure total debit equals total credit.']);
+					throw new \DomainException('Cannot post unbalanced journal. Please ensure total debit equals total credit.');
 				}
 				$journal->update(['status' => 'posted']);
 			} else {
-				if (bccomp($totalDebit, $totalCredit, 2) !== 0) {
-                // Optional: warn user but still save as draft
-					session()->flash('status', 'Draft saved but journal is unbalanced.');
-				}
+				$journal->update(['status' => 'draft']);
 			}
 
 			DB::commit();
 
-			return redirect()->route('journals.index')->with('success',
-			                                                 $journal->status === 'posted'
-			                                                 ? 'Journal posted successfully.'
-			                                                 : 'Draft journal saved.'
-			                                               );
+			$msg = $journal->status === 'posted'
+			? 'Journal posted successfully.'
+			: 'Draft journal saved.';
 
+			return redirect()->route('journals.index')->with('success', $msg);
+		} catch (\DomainException $e) {
+			DB::rollBack();
+			return back()->withInput()->with('danger', $e->getMessage());
 		} catch (\Throwable $e) {
 			DB::rollBack();
 			report($e);
-			return back()->withInput()->withErrors(['msg' => $e->getMessage()]);
+			return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
 		}
 	}
 
-
-	/** Post existing draft */
 	public function post(Journal $journal)
 	{
 		try {
-			\App\Services\Accounting\JournalService::postDraft($journal);
+			JournalService::postDraft($journal);
 			return back()->with('success', 'Journal posted successfully.');
 		} catch (\DomainException $e) {
-			return back()->withErrors(['msg' => $e->getMessage()]);
+			return back()->with('danger', $e->getMessage());
 		} catch (\Throwable $e) {
 			report($e);
-			return back()->withErrors(['msg' => 'Unexpected error: '.$e->getMessage()]);
+			return back()->with('danger', 'Unexpected error: ' . $e->getMessage());
 		}
 	}
 
 	public function unpost(Journal $journal)
 	{
 		try {
-			\App\Services\Accounting\JournalService::unpost($journal);
+			JournalService::unpost($journal);
 			return back()->with('success', 'Journal reverted to draft successfully.');
 		} catch (\DomainException $e) {
-			return back()->withErrors(['msg' => $e->getMessage()]);
+			return back()->with('danger', $e->getMessage());
 		} catch (\Throwable $e) {
 			report($e);
-			return back()->withErrors(['msg' => 'Unexpected error: '.$e->getMessage()]);
+			return back()->with('danger', 'Unexpected error: ' . $e->getMessage());
 		}
 	}
 
-	/** Soft delete journal */
 	public function destroy(Journal $journal)
 	{
 		$journal->delete();
