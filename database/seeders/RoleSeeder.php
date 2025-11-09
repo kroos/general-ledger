@@ -2,19 +2,43 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
-        $roles = ['Owner','System Administrator','Accountant','Manager','Staff'];
-        foreach ($roles as $r) Role::firstOrCreate(['name'=>$r]);
-    }
+	public function run()
+	{
+		// Roles
+		$owner = Role::firstOrCreate(['name' => 'owner']);
+		$accountant = Role::firstOrCreate(['name' => 'accountant']);
+		$manager = Role::firstOrCreate(['name' => 'manager']);
+		$staff = Role::firstOrCreate(['name' => 'staff']);
+
+		// Permissions
+		$permissions = [
+			'manage accounts',
+			'manage journals',
+			'manage sales invoices',
+			'manage purchase bills',
+			'manage payments',
+			'view reports',
+			'post entries',
+			'delete records',
+		];
+
+		foreach ($permissions as $perm) {
+			Permission::firstOrCreate(['name' => $perm]);
+		}
+
+		// Assign permissions
+		$owner->givePermissionTo(Permission::all());
+		$accountant->givePermissionTo([
+			'manage accounts', 'manage journals', 'manage sales invoices',
+			'manage purchase bills', 'manage payments', 'view reports', 'post entries'
+		]);
+		$manager->givePermissionTo(['view reports']);
+		$staff->givePermissionTo(['manage sales invoices', 'manage purchase bills', 'manage payments']);
+	}
 }

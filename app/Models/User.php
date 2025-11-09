@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
+use Spatie\Permission\Traits\HasRoles;
+
 // db relation class to load
 use Illuminate\Database\Eloquent\SoftDeletes;
 // use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -20,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class User extends Authenticatable
 {
 	/** @use HasFactory<\Database\Factories\UserFactory> */
-	use HasFactory, Notifiable, SoftDeletes;
+	use HasFactory, Notifiable, SoftDeletes, HasRoles;
 
 	// protected $connection = 'mysql';
 	protected $table = 'users';

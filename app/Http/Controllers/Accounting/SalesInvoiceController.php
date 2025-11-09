@@ -81,7 +81,7 @@ class SalesInvoiceController extends Controller
 			'items.*.amount' => 'required|numeric|min:0',
 		]);
 
-		$action = $request->input('action', 'draft');
+		$action = $request->input('action');
 
 		try {
 			DB::beginTransaction();
@@ -96,18 +96,14 @@ class SalesInvoiceController extends Controller
 
 			if ($action === 'draft') {
 				$invoice->update(['status' => 'draft']);
-				DB::commit();
 				return redirect()->route('accounting.sales-invoices.index')->with('success', 'Sales Invoice saved as draft successfully.');
+			} else {
+				$journal = $journalService->recordInvoice($invoice);
+				$invoice->update(['journal_id' => $journal->id,'status' => 'posted',]);
+				return redirect()->route('accounting.sales-invoices.index')->with('success', 'Sales Invoice posted successfully.');
 			}
-
-			$journal = $journalService->recordInvoice($invoice);
-			$invoice->update([
-				'journal_id' => $journal->id,
-				'status' => 'posted',
-			]);
-
 			DB::commit();
-			return redirect()->route('accounting.sales-invoices.index')->with('success', 'Sales Invoice posted successfully.');
+
 		} catch (\DomainException $e) {
 			DB::rollBack();
 			return back()->withInput()->with('danger', $e->getMessage());
@@ -118,10 +114,21 @@ class SalesInvoiceController extends Controller
 		}
 	}
 
+	public function show(SalesInvoice $sales_invoice)
+	{
+		return view('accounting.sales_invoices.show', ['invoice' => $sales_invoice->load('items.account', 'journal.entries.account')]);
+	}
+
+	public function edit(SalesInvoice $sales_invoice)
+	{
+		return view('accounting.sales_invoices.edit', ['invoice' => $sales_invoice->load('items')]);
+	}
+
 	public function update(Request $request, SalesInvoice $sales_invoice, JournalService $journalService)
 	{
+		// dd($request->all());
 		$request->validate([
-			'date' => 'required',
+			'date' => 'required|date',
 			'reference_no' => 'required|string|max:255',
 			'supplier_id' => 'nullable',
 			'tax' => 'required|numeric',
@@ -129,12 +136,14 @@ class SalesInvoiceController extends Controller
 			'subtotal' => 'required|numeric',
 			'total_amount' => 'required|numeric',
 			'items' => 'required|array|min:1',
-			'items.*.account_id' => 'required|numeric',
+			'items.*.account_id' => 'required|exists:accounts,id',
 			'items.*.description' => 'nullable|string|max:500',
-			'items.*.quantity' => 'required|numeric',
-			'items.*.unit_price' => 'required|numeric',
-			'items.*.amount' => 'required|numeric',
+			'items.*.quantity' => 'required|numeric|min:0',
+			'items.*.unit_price' => 'required|numeric|min:0',
+			'items.*.amount' => 'required|numeric|min:0',
 		]);
+
+		$action = $request->input('action');
 
 		try {
 			DB::beginTransaction();
@@ -148,10 +157,9 @@ class SalesInvoiceController extends Controller
 				$sales_invoice->items()->create($item);
 			}
 
-			$action = $request->input('action', 'draft');
-
 			if ($action === 'post') {
 				$journal = $journalService->recordInvoice($sales_invoice);
+				dd($journal, $sales_invoice);
 				$sales_invoice->update(['journal_id' => $journal->id, 'status' => 'posted']);
 				$msg = 'Sales Invoice updated and posted successfully.';
 			} else {

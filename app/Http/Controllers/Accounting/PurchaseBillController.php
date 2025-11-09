@@ -81,7 +81,7 @@ class PurchaseBillController extends Controller
 			'items.*.amount' => 'required|numeric|min:0',
 		]);
 
-		$action = $request->input('action', 'draft');
+		$action = $request->input('action');
 
 		try {
 			DB::beginTransaction();
@@ -115,23 +115,68 @@ class PurchaseBillController extends Controller
 		}
 	}
 
-	public function update(Request $request, PurchaseBill $purchase_bill)
+	public function show(PurchaseBill $purchase_bill)
+	{
+		return view('accounting.purchase_bills.show', ['bill' => $purchase_bill->load('items.account', 'journal.entries.account')]);
+	}
+
+	public function edit(PurchaseBill $purchase_bill)
+	{
+		return view('accounting.purchase_bills.edit', ['bill' => $purchase_bill->load('items')]);
+	}
+
+	public function update(Request $request, PurchaseBill $purchase_bill, JournalService $journalService)
 	{
 		$request->validate([
-			'date' => 'required',
+			'date' => 'required|date',
 			'reference_no' => 'required|string|max:255',
 			'supplier_id' => 'nullable',
 			'tax' => 'required|numeric',
 			'tax_rate_percent' => 'required|numeric',
 			'subtotal' => 'required|numeric',
-			'total' => 'required|numeric',
+			'total_amount' => 'required|numeric',
+			'items' => 'required|array|min:1',
+			'items.*.account_id' => 'required|exists:accounts,id',
+			'items.*.description' => 'nullable|string|max:500',
+			'items.*.quantity' => 'required|numeric|min:0',
+			'items.*.unit_price' => 'required|numeric|min:0',
+			'items.*.amount' => 'required|numeric|min:0',
 		]);
 
-		$purchase_bill->update($request->all());
+		$action = $request->input('action');
 
-		$this->safeRecord(fn() => $this->journalService->recordBill($purchase_bill), 'PurchaseBill update');
+		try {
+			DB::beginTransaction();
 
-		return redirect()->route('purchase-bills.index')->with('success', 'Purchase bill updated successfully and journal recorded.');
+			$purchase_bill->update($request->only([
+				'date', 'supplier_id', 'reference_no', 'subtotal', 'tax', 'total', 'total_amount', 'tax_rate_percent',
+			]));
+
+			$purchase_bill->items()->delete();
+			foreach ($request->items ?? [] as $item) {
+				$purchase_bill->items()->create($item);
+			}
+
+			if ($action === 'draft') {
+				$purchase_bill->update(['status' => 'draft']);
+				DB::commit();
+				return redirect()->route('accounting.purchase-bills.index')->with('success', 'Purchase Bill saved as draft successfully.');
+			} else {
+				// $this->safeRecord(fn() => $this->journalService->recordBill($purchase_bill), 'PurchaseBill update');
+				$journalService->recordBill($purchase_bill);
+				$purchase_bill->update(['journal_id' => $journal->id, 'status' => 'posted']);
+				DB::commit();
+				return redirect()->route('accounting.purchase-bills.index')->with('success', 'Purchase Bill posted successfully.');
+			}
+
+		} catch (\DomainException $e) {
+			DB::rollBack();
+			return back()->withInput()->with('danger', $e->getMessage());
+		} catch (\Throwable $e) {
+			DB::rollBack();
+			report($e);
+			return back()->withInput()->with('danger', 'Unexpected error: ' . $e->getMessage());
+		}
 	}
 
 	public function destroy(PurchaseBill $purchase_bill)

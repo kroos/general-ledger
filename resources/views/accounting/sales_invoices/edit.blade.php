@@ -142,20 +142,6 @@ function recalcTotals() {
 	$('[name="total_amount"]').val(total);
 }
 
-// Confirm before submit
-$('#form').on('submit', function(e) {
-	e.preventDefault();
-	swal.fire({
-		title: 'Save as draft?',
-		text: 'You can post this invoice later.',
-		icon: 'question',
-		showCancelButton: true,
-		confirmButtonText: 'Yes, save it',
-	}).then(res => {
-		if (res.isConfirmed) this.submit();
-	});
-});
-
 // restore from failed validation
 @php
 $items = $invoice->items()->get(['account_id', 'description', 'quantity', 'unit_price', 'amount']);

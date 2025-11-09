@@ -79,13 +79,13 @@ Route::prefix('journals')->name('journals.')->group(function () {
 	Route::post('/{journal}/post', [JournalController::class, 'post'])->name('post');
 	Route::post('/{journal}/unpost', [JournalController::class, 'unpost'])->name('unpost');
 	Route::delete('/{journal}', [JournalController::class, 'destroy'])->name('destroy');
-});
+})->middleware(['auth', 'role:owner|accountant']);
 
 Route::prefix('activity-logs')->name('activity-logs.')->group(function () {
 	Route::get('/', [ActivityLogController::class, 'index'])->name('index');
 	Route::get('/{log}', [ActivityLogController::class, 'show'])->name('show');
 	Route::delete('/{log}', [ActivityLogController::class, 'destroy'])->name('destroy');
-});
+})->middleware(['auth', 'role:owner']);
 
 Route::get('/journals/draft-count', function () {
 	$count = \App\Models\Accounting\Journal::where('status','draft')->count();
@@ -97,7 +97,7 @@ Route::prefix('reports')->name('reports.')->group(function () {
 	Route::get('trial-balance', [TrialBalanceController::class, 'index'])->name('trial-balance.index');
 	Route::get('profit-loss', [ProfitLossController::class, 'index'])->name('profit-loss.index');
 	Route::get('balance-sheet', [BalanceSheetController::class, 'index'])->name('balance-sheet.index');
-});
+})->middleware(['auth', 'role:owner|manager|accountant']);
 
 Route::prefix('accounts')->name('accounts.')->group(function () {
 	Route::get('/', [AccountController::class, 'index'])->name('index');
@@ -106,7 +106,7 @@ Route::prefix('accounts')->name('accounts.')->group(function () {
 	Route::get('/{account}/edit', [AccountController::class, 'edit'])->name('edit');
 	Route::patch('/{account}', [AccountController::class, 'update'])->name('update');
 	Route::delete('/{account}', [AccountController::class, 'destroy'])->name('destroy');
-});
+})->middleware(['auth', 'role:owner|accountant']);
 
 Route::prefix('accounting')->name('accounting.')->group(function () {
 	Route::resource('sales-invoices', SalesInvoiceController::class);
@@ -114,13 +114,13 @@ Route::prefix('accounting')->name('accounting.')->group(function () {
 
 	Route::resource('purchase-bills', PurchaseBillController::class);
 	Route::post('purchase-bills/{bill}/post', [PurchaseBillController::class, 'post'])->name('purchase-bills.post');
-});
+})->middleware(['auth', 'role:owner|manager|accountant']);
 
 
 Route::resource('payments', PaymentController::class)->names('accounting.payments');
 
 Route::get('journals/draft-count', function() {
 	return response()->json(['count' => \App\Models\Accounting\Journal::where('status', 'draft')->count()]);
-})->name('journals.draft-count');
+})->name('journals.draft-count')->middleware(['auth', 'role:owner|manager|accountant']);
 
 
