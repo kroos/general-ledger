@@ -4,7 +4,7 @@
 
 	<form method="post" action="{{ route('password.update') }}">
 		@csrf
-		@method('patch')
+		@method('PUT')
 
 		<div class="form-group row m-2 @error('current_password') has-error @enderror">
 			<label for="current_password" class="col-sm-4 col-form-label col-form-label-sm">Current Password : </label>

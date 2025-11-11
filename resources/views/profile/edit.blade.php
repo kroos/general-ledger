@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="col-sm-6 d-flex flex-column align-items-center justify-content-center">
+<div class="col-sm-12 row align-items-center justify-content-center">
 	<h3>Profile</h3>
 
 

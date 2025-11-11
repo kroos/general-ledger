@@ -16,16 +16,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class YesNoOption extends Model
 {
-    //
-    use SoftDeletes;
-    // protected $connection = '';
-    // protected $table = '';
-    // protected $primaryKey = '';
-    // public $incrementing = false;
-    // protected $keyType = '';
-    // const CREATED_AT = '';
-    // const UPDATED_AT = '';
-    // protected $rememberTokenName = '';
+	use SoftDeletes;
+	// protected $connection = '';
+	// protected $table = '';
+	// protected $primaryKey = '';
+	// public $incrementing = false;
+	// protected $keyType = '';
+	// const CREATED_AT = '';
+	// const UPDATED_AT = '';
+	// protected $rememberTokenName = '';
 
 
 }

@@ -27,8 +27,8 @@
 				</li>
 
 
-					@include('layouts.navigation')
 				@auth
+					@include('layouts.navigation')
 				@else
 					<!-- nav for guest -->
 				@endauth
@@ -37,7 +37,7 @@
 				@auth
 					<div class="dropdown me-5">
 						<a href="#" class="btn btn-sm btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-							@if(\Auth::user()->belongstouser->unreadNotifications->count())<span class="badge text-bg-warning">{{$user->unreadNotifications->count()}}</span>@endif
+							@if(\Auth::user()->belongstouser->unreadNotifications?->count())<span class="badge text-bg-warning">{{ \Auth::user()->belongstouser->unreadNotifications->count() }}</span>@endif
               {{ Auth::user()->belongstouser->name }}
             </a>
 						<ul class="dropdown-menu">
@@ -48,13 +48,13 @@
 								<!-- notification -->
 								@include('layouts.notification')
 							</li>
-							<form method="POST" action="{{ route('logout') }}">
-								@csrf
 								<li>
+								<form method="POST" action="{{ route('logout') }}">
+									@csrf
 									<a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();"><i class="fas fa-light fa-right-from-bracket"></i> Log Out</a>
+								</form>
+							</ul>
 								</li>
-							</form>
-						</ul>
 					</div>
 
 				@else
@@ -74,7 +74,7 @@
 <!-- end navigation -->
 
 <!-- 2nd nav -->
-<!-- <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
 	<div class="container-fluid">
 		<a class="navbar-brand" href="#">Navbar</a>
 		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,5 +113,5 @@
 			</form>
 		</div>
 	</div>
-</nav> -->
+</nav>
 <!-- 2nd nav end -->

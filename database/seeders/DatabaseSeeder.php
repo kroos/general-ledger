@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -22,10 +21,8 @@ class DatabaseSeeder extends Seeder
 
 		$this->call([
 				YesNoOptionSeeder::class,
-		    LedgerTypeSeeder::class,
-		    AccountSeeder::class,
-		    TransactionRuleSeeder::class,
-		    RoleSeeder::class,
+				AccountTypeSeeder::class,
+				AccountSeeder::class,
 		]);
 	}
 }

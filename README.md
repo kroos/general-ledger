@@ -1,1 +1,1 @@
-# general-ledger
+# laravel12-vite-boilerplate-API

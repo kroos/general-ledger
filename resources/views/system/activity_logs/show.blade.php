@@ -26,6 +26,8 @@
 
     <h6>Changes:</h6>
     <pre class="bg-light p-3 border rounded" style="white-space: pre-wrap;">{{ json_encode($log->changes, JSON_PRETTY_PRINT) }}</pre>
+    <h6>Snapshots:</h6>
+    <pre class="bg-light p-3 border rounded" style="white-space: pre-wrap;">{{ json_encode($log->snapshot, JSON_PRETTY_PRINT) }}</pre>
   </div>
 </div>
 @endsection

@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('{{ table }}', function (Blueprint $table) {
-            $table->charset('utf8mb4')->collation('utf8mb4_unicode_ci');
+        Schema::create('account_types', function (Blueprint $table) {
+            $table->charset('utf8mb4');
+            $table->collation('utf8mb4_unicode_ci');
             $table->id();
+            $table->string('account_type');
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('{{ table }}');
+        Schema::dropIfExists('account_types');
     }
 };

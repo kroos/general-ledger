@@ -50,7 +50,7 @@ use Log;
 
 class ActivityLogController extends Controller
 {
-	public function index(Request $request)
+	public function index()
 	{
 		return view('system.activity_logs.index');
 	}

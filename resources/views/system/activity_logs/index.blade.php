@@ -41,7 +41,7 @@ $('#logs-table').DataTable({
 				return `${modelName}${modelId}`;
 			}
 		},
-		{ data:'user.name', title:'User', defaultContent: 'System' },
+		{ data:'belongstouser.name', title:'User', defaultContent: 'System' },
 		{ data:'ip_address', title:'IP Address' },
 		{ data:'created_at', title:'Timestamp', render: data => moment(data).format('D MMM YYYY h:mm a') },
 		{

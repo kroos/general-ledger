@@ -4,14 +4,13 @@ use Illuminate\Support\Facades\Route;
 // read API from files
 use Illuminate\Support\Facades\Storage;
 
-use App\Http\Controllers\API\YesNoOptionController;
-use App\Http\Controllers\API\JavaScriptSupportController;
+use App\Http\Controllers\API\ModelAjaxSupportController;
 
-
-Route::middleware('auth:sanctum')->group(function () {
-	Route::apiResources([
-		'yesnooption' => YesNoOptionController::class,
-	]);
+Route::middleware(['auth', 'auth:sanctum'])->group(function () {
+	Route::controller(ModelAjaxSupportController::class)->group(function () {
+		Route::get('/getActivityLogs', 'getActivityLogs')->name('getActivityLogs');
+		Route::get('/getYesNoOptions', 'getYesNoOptions')->name('getYesNoOptions');
+	});
 });
 
 // Get all countries
@@ -47,13 +46,3 @@ Route::get('/states/{country_id}', function ($country_id) {
 	return response()->json($filtered);
 })->name('states');
 
-
-Route::controller(JavaScriptSupportController::class)->group(function () {
-	Route::get('/getAccounts', 'getAccounts')->name('getAccounts');
-	Route::get('/getJournals', 'getJournals')->name('getJournals');
-	Route::get('/getLedgerTypes', 'getLedgerTypes')->name('getLedgerTypes');
-	Route::get('/getSalesInvoices', 'getSalesInvoices')->name('getSalesInvoices');
-	Route::get('/getPurchaseBills', 'getPurchaseBills')->name('getPurchaseBills');
-	Route::get('/getActivityLogs', 'getActivityLogs')->name('getActivityLogs');
-	Route::get('/getPayments', 'getPayments')->name('getPayments');
-});

@@ -1,5 +1,5 @@
 <?php
-namespace App\Models;
+namespace App\Models\Accounting;
 
 // use Illuminate\Database\Eloquent\Model;
 use App\Models\Model;
@@ -8,23 +8,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 // use Illuminate\Database\Eloquent\Relations\HasOne;
 // use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 // use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
-// use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 // use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+// use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 // load helper
 use Illuminate\Support\Str;
 
-class ActivityLog extends Model
+class AccountType extends Model
 {
+	//
 	use SoftDeletes;
-
-	// Disable auditing for this model (to prevent recursive logging)
-	protected bool $auditEnabled = false;
-
 	// protected $connection = '';
-	protected $table = 'activity_logs';
+	protected $table = 'account_types';
 	// protected $primaryKey = '';
 	// public $incrementing = false;
 	// protected $keyType = '';
@@ -32,30 +29,26 @@ class ActivityLog extends Model
 	// const UPDATED_AT = '';
 	// protected $rememberTokenName = '';
 
-	protected $casts = [
-		'changes' => 'array',
-		'snapshot' => 'array',
-		'meta' => 'array',
-		'is_critical' => 'boolean',
-	];
-
+	// protected $casts = [
+	// 	'is_active' => 'boolean',
+	// ];
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// set column attribute
-	// public function setNameAttribute($value)
-	// {
-	//     $this->attributes['name'] = ucwords(Str::lower($value));
-	// }
+	public function setAccountTypeAttribute($value)
+	{
+	    $this->attributes['account_type'] = ucwords(Str::lower($value));
+	}
+
+	public function setDescriptionAttribute($value)
+	{
+	    $this->attributes['description'] = ucwords(Str::lower($value));
+	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// relationship
-	public function belongstouser(): BelongsTo
+	public function hasmanyaccount(): HasMany
 	{
-		return $this->belongsTo(\App\Models\User::class, 'user_id');
-	}
-
-	public function model()
-	{
-		return $this->morphTo();
+		$this->HasMany(\App\Models\Accounting\Account, 'account_type_id');
 	}
 }

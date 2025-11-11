@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
 
-use Spatie\Permission\Traits\HasRoles;
+// auditable model
+use App\Traits\Auditable;
+
+// load helper
+use Illuminate\Support\Str;
 
 // db relation class to load
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,8 +24,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
-	/** @use HasFactory<\Database\Factories\UserFactory> */
-	use HasFactory, Notifiable, SoftDeletes, HasRoles;
+	// notify can be done on User model too
+	use HasFactory, Notifiable, SoftDeletes, Auditable;
+
+	// audit
+	// protected static $auditExclude = ['password'];
+	protected static $auditIncludeSnapshot = true;
+	protected static $auditCriticalEvents = ['create', 'updated', 'deleted','force_deleted'];
 
 	// protected $connection = 'mysql';
 	protected $table = 'users';
@@ -48,9 +56,8 @@ class User extends Authenticatable
 	 */
 	protected $casts = [
 		'email_verified_at' => 'datetime',
-		// 'password' => 'hashed',		// this is because we are using clear text password
+		// 'active' => 'boolean',
 	];
-
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	public function setNameAttribute($value)

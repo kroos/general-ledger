@@ -41,7 +41,6 @@
 @endsection
 
 @section('js')
-$.get('http://localhost:8000/sanctum/csrf-cookie').done(function () {
 
 	$('#opt').select2({
 		theme: 'bootstrap-5',
@@ -50,7 +49,7 @@ $.get('http://localhost:8000/sanctum/csrf-cookie').done(function () {
 		closeOnSelect: true,
 		width: '100%',
 		ajax: {
-			url: '{{ route('yesnooption.index') }}',
+			url: '{{ route('getYesNoOptions') }}',
 			type: 'GET',
 			dataType: 'json',
 			delay: 250,											// Delay to reduce server requests
@@ -64,7 +63,7 @@ $.get('http://localhost:8000/sanctum/csrf-cookie').done(function () {
 				return {
 					results: data.map(function(item) {
 						return {
-							id: item.value,
+							id: item.id,
 							text: item.option,
 							raw: item
 						}
@@ -77,6 +76,5 @@ $.get('http://localhost:8000/sanctum/csrf-cookie').done(function () {
 		var newOptionType = new Option('{!! \App\Models\YesNoOption::find(old('option'))->value !!}', '{{ old('option') }}', true, true);
 		$('#opt').append(newOptionType).trigger('change');
 	@endif
-});
 
 @endsection

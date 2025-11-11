@@ -6,7 +6,10 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-// use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\HasApiTokens;
+
+// auditable model
+use App\Traits\Auditable;
 
 // database relationship
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,18 +21,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-// custom email reset password in
-// https://laracasts.com/discuss/channels/laravel/how-to-override-the-tomail-function-in-illuminateauthnotificationsresetpasswordphp
-// use App\Notifications\ResetPassword;
-
 class Login extends Authenticatable implements MustVerifyEmail
 {
+	// use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+	use HasApiTokens, HasFactory, Notifiable, SoftDeletes, Auditable;
+
+	// audit
+	protected static $auditExclude = ['password','remember_token'];
+	protected static $auditIncludeSnapshot = true;
+	protected static $auditCriticalEvents = ['updated', 'deleted','force_deleted'];
+
 	// protected $connection = 'mysql';
 	protected $table = 'logins';
 	protected $primaryKey = 'id';
-
-	// use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
-	use HasFactory, Notifiable, SoftDeletes;
 
 	 /**
 	 * The attributes that are mass assignable.
@@ -60,7 +64,8 @@ class Login extends Authenticatable implements MustVerifyEmail
 	 * @var array<string, string>
 	 */
 	protected $casts = [
-	// 	'email_verified_at' => 'datetime',
+		 // 'email_verified_at' => 'datetime',
+		 // 'active' => 'boolean',
 		'password' => 'hashed',		// this is because we are using clear text password
 	];
 
@@ -108,11 +113,8 @@ class Login extends Authenticatable implements MustVerifyEmail
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// for email Notifiable
-	// https://laravel.com/docs/7.x/notifications
 	public function routeNotificationForMail($notification)
 	{
-		// Return email address only...
-		// return $this->belongtouser->email;
 		return [$this->belongstouser->email => $this->belongstouser->name];
 	}
 
