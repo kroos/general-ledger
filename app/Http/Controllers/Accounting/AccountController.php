@@ -1,5 +1,7 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Accounting;
+
+use App\Http\Controllers\Controller;
 
 // for controller output
 use Illuminate\Http\JsonResponse;
