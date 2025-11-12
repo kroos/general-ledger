@@ -17,9 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 // load validation
-use Illuminate\Http\Request;
+use {{ namespacedRequests }}
 use Illuminate\Support\Facades\Validator;
-// use {{ namespacedRequests }}
 
 // load batch and queue
 use Illuminate\Bus\Batch;

@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\DB;
 // load validation
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
 
 // load batch and queue
 use Illuminate\Bus\Batch;
@@ -52,59 +51,59 @@ use Log;
 
 class AccountController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): View
-    {
-        //
-    }
+	/**
+	 * Display a listing of the resource.
+	 */
+	public function index(): View
+	{
+		return view('accounting.accounts.index');
+	}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): View
-    {
-        //
-    }
+	/**
+	 * Show the form for creating a new resource.
+	 */
+	public function create(): View
+	{
+		return view('accounting.accounts.create');
+	}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
+	/**
+	 * Store a newly created resource in storage.
+	 */
+	public function store(Request $request): RedirectResponse
+	{
+		//
+	}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Account $account): View
-    {
-        //
-    }
+	/**
+	 * Display the specified resource.
+	 */
+	public function show(Account $account): View
+	{
+		return view('accounting.accounts.show', ['account' => $account]);
+	}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Account $account): View
-    {
-        //
-    }
+	/**
+	 * Show the form for editing the specified resource.
+	 */
+	public function edit(Account $account): View
+	{
+		return view('accounting.accounts.edit', ['account' => $account]);
+	}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Account $account): RedirectResponse
-    {
-        //
-    }
+	/**
+	 * Update the specified resource in storage.
+	 */
+	public function update(Request $request, Account $account): RedirectResponse
+	{
+		//
+	}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Account $account): JsonResponse
-    {
-        //
-    }
+	/**
+	 * Remove the specified resource from storage.
+	 */
+	public function destroy(Account $account): JsonResponse
+	{
+		//
+	}
 }

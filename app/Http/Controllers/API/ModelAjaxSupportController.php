@@ -14,6 +14,9 @@ use Illuminate\Http\JsonResponse;
 use App\Models\{
 	YesNoOption, ActivityLog
 };
+use App\Models\Accounting\{
+	Account, AccountType, Ledger, LedgerEntry
+};
 
 // load db facade
 use Illuminate\Database\Eloquent\Builder;
@@ -72,10 +75,65 @@ class ModelAjaxSupportController extends Controller
 	public function getYesNoOptions(Request $request): JsonResponse
 	{
 		$yno = YesNoOption::when($request->search, function (Builder $query) use ($request) {
-						$query->where('option', 'LIKE', '%' . $request->search . '%');
-					})
-					->get();
+													$query->where('option', 'LIKE', '%' . $request->search . '%');
+												})
+												->when($request->id, function($query) use ($request){
+													$query->where('id', $request->id);
+												})
+												->get();
 		return response()->json($yno);
+	}
+
+	public function getAccounts(Request $request): JsonResponse
+	{
+		$accounts = Account::when($request->search, function (Builder $query) use ($request) {
+													$query->where('option', 'LIKE', '%' . $request->search . '%')
+														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+												})
+												->when($request->id, function($query) use ($request){
+													$query->where('id', $request->id);
+												})
+												->get();
+		return response()->json($accounts);
+	}
+
+	public function getAccountTypes(Request $request): JsonResponse
+	{
+		$accounttypes = AccountType::when($request->search, function (Builder $query) use ($request) {
+													$query->where('option', 'LIKE', '%' . $request->search . '%')
+														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+												})
+												->when($request->id, function($query) use ($request){
+													$query->where('id', $request->id);
+												})
+												->get();
+		return response()->json($accounttypes);
+	}
+
+	public function getLedgers(Request $request): JsonResponse
+	{
+		$ledgers = Ledger::when($request->search, function (Builder $query) use ($request) {
+													$query->where('option', 'LIKE', '%' . $request->search . '%')
+														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+												})
+												->when($request->id, function($query) use ($request){
+													$query->where('id', $request->id);
+												})
+												->get();
+		return response()->json($ledgers);
+	}
+
+	public function getLedgerEntries(Request $request): JsonResponse
+	{
+		$ledgersentries = LedgerEntry::when($request->search, function (Builder $query) use ($request) {
+													$query->where('option', 'LIKE', '%' . $request->search . '%')
+														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+												})
+												->when($request->id, function($query) use ($request){
+													$query->where('id', $request->id);
+												})
+												->get();
+		return response()->json($ledgersentries);
 	}
 
 }

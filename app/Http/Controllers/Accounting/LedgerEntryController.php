@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\DB;
 
 
 // load validation
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -52,59 +51,59 @@ use Log;
 
 class LedgerEntryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): View
-    {
-        //
-    }
+	/**
+	 * Display a listing of the resource.
+	 */
+	public function index(): View
+	{
+		return view('accounting.ledger_entries.index');
+	}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): View
-    {
-        //
-    }
+	/**
+	 * Show the form for creating a new resource.
+	 */
+	public function create(): View
+	{
+		return view('accounting.ledger_entries.create');
+	}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
+	/**
+	 * Store a newly created resource in storage.
+	 */
+	public function store(Request $request): RedirectResponse
+	{
+		//
+	}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(LedgerEntry $ledgerEntry): View
-    {
-        //
-    }
+	/**
+	 * Display the specified resource.
+	 */
+	public function show(LedgerEntry $ledgerEntry): View
+	{
+		return view('accounting.ledger_entries.show', ['ledgerEntry' => $ledgerEntry]);
+	}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(LedgerEntry $ledgerEntry): View
-    {
-        //
-    }
+	/**
+	 * Show the form for editing the specified resource.
+	 */
+	public function edit(LedgerEntry $ledgerEntry): View
+	{
+		return view('accounting.ledger_entries.edit', ['ledgerEntry' => $ledgerEntry]);
+	}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, LedgerEntry $ledgerEntry): RedirectResponse
-    {
-        //
-    }
+	/**
+	 * Update the specified resource in storage.
+	 */
+	public function update(Request $request, LedgerEntry $ledgerEntry): RedirectResponse
+	{
+		//
+	}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(LedgerEntry $ledgerEntry): JsonResponse
-    {
-        //
-    }
+	/**
+	 * Remove the specified resource from storage.
+	 */
+	public function destroy(LedgerEntry $ledgerEntry): JsonResponse
+	{
+		//
+	}
 }
