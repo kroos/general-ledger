@@ -7,7 +7,7 @@
 			<h6>Account Types</h6>
 		</div>
 		<div class="text-dark text-secondary">
-			<a href="{{ route('account-type.index') }}" class="btn btn-sm btn-outline-secondary">Back</a>
+			<a href="{{ route('account-types.index') }}" class="btn btn-sm btn-outline-secondary">Back</a>
 		</div>
 	</div>
 	<div class="card-body">

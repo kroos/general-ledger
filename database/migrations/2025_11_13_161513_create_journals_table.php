@@ -11,12 +11,13 @@ return new class extends Migration
 	 */
 	public function up(): void
 	{
-		Schema::create('ledgers', function (Blueprint $table) {
+		Schema::create('journals', function (Blueprint $table) {
 			$table->charset('utf8mb4');
 			$table->collation('utf8mb4_unicode_ci');
 			$table->id();
-			$table->foreignId('account_type_id')->constrained('account_types')->cascadeOnDelete();
-			$table->string('ledger');
+			$table->foreignId('ledger_id')->constrained('ledgers')->cascadeOnDelete();
+			$table->datetime('date')->nullable();
+			$table->string('no_reference')->nullable();
 			$table->text('description')->nullable();
 			$table->timestamps();
 			$table->softDeletes();
@@ -28,6 +29,6 @@ return new class extends Migration
 	 */
 	public function down(): void
 	{
-		Schema::dropIfExists('ledgers');
+		Schema::dropIfExists('journals');
 	}
 };

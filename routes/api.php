@@ -13,7 +13,8 @@ Route::middleware(['auth', 'auth:sanctum'])->group(function () {
 		Route::get('/getAccounts', 'getAccounts')->name('getAccounts');
 		Route::get('/getAccountTypes', 'getAccountTypes')->name('getAccountTypes');
 		Route::get('/getLedgers', 'getLedgers')->name('getLedgers');
-		Route::get('/getLedgerEntries', 'getLedgerEntries')->name('getLedgerEntries');
+		Route::get('/getJournals', 'getJournals')->name('getJournals');
+		Route::get('/getJournalEntries', 'getJournalEntries')->name('getJournalEntries');
 	});
 });
 

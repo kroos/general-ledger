@@ -7,7 +7,7 @@
 			<h6>Account Types</h6>
 		</div>
 		<div class="text-dark text-secondary">
-			<a href="{{ route('account-type.create') }}" class="btn btn-sm btn-outline-primary">Create New</a>
+			<a href="{{ route('account-types.create') }}" class="btn btn-sm btn-outline-primary">Create New</a>
 		</div>
 	</div>
 	<div class="card-body">
@@ -21,8 +21,6 @@
 @endsection
 
 @section('js')
-// $.fn.dataTable.moment( 'D MMM YYYY' );
-// $.fn.dataTable.moment( 'h:mm a' );
 var table = $('#at').DataTable({
 	// columnDefs: [
 	// 	{ type: 'date', 'targets': [4,5,6] },
@@ -53,8 +51,8 @@ var table = $('#at').DataTable({
 			render: function(id){
 				return `
 					<div class="btn-group btn-group-sm" role="group">
-						<!-- <a href="{{ url('account-type') }}/${id}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i></a> -->
-						<a href="{{ url('account-type') }}/${id}/edit" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
+						<!-- <a href="{{ url('account-types') }}/${id}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i></a> -->
+						<a href="{{ url('account-types') }}/${id}/edit" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
 						<button type="button" class="btn btn-sm btn-outline-danger remove" data-id="${id}">
 							<i class="fa fa-trash"></i>
 						</button>
@@ -80,7 +78,7 @@ $(document).on('click', '.remove', function(e){
 	}).then(res=>{
 		if(res.isConfirmed){
 			$.ajax({
-				url: '{{ url("account-type") }}/'+id,
+				url: '{{ url("account-types") }}/'+id,
 				type: 'DELETE',
 				data: {_token:'{{ csrf_token() }}'},
 				success: ()=> table.ajax.reload(null, false)

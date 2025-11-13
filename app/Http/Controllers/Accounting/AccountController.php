@@ -89,7 +89,7 @@ class AccountController extends Controller
 			'description' => 'Description'
 		]);
 		Account::create($request->only(['account_type_id', 'account', 'code', 'description']));
-		return redirect()->route('account.index')->with('success', 'Data save');
+		return redirect()->route('account2.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -130,7 +130,7 @@ class AccountController extends Controller
 			'description' => 'Description'
 		]);
 		$account->update($request->only(['account_type_id', 'account', 'code', 'description']));
-		return redirect()->route('account.index')->with('success', 'Data save');
+		return redirect()->route('accounts.index')->with('success', 'Data save');
 	}
 
 	/**

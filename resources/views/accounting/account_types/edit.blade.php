@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<form method="POST" action="{{ route('account-type.update', $accountType) }}" accept-charset="UTF-8" id="form" autocomplete="off" class="" enctype="multipart/form-data">
+<form method="POST" action="{{ route('account-types.update', $accountType) }}" accept-charset="UTF-8" id="form" autocomplete="off" class="" enctype="multipart/form-data">
 	@csrf
 	@method('PATCH')
 	<div class="card">
@@ -18,7 +18,7 @@
 				<button type="submit" class="btn btn-sm btn-outline-primary">Submit</button>
 			</div>
 			<div class="m-1">
-				<a href="{{ route('account-type.index') }}" class="btn btn-sm btn-outline-secondary">Cancel</a>
+				<a href="{{ route('account-types.index') }}" class="btn btn-sm btn-outline-secondary">Cancel</a>
 			</div>
 		</div>
 </div>

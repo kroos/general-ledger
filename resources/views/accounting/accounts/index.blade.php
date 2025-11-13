@@ -7,7 +7,7 @@
 			<h6>Account</h6>
 		</div>
 		<div class="text-dark text-secondary">
-			<a href="{{ route('account.create') }}" class="btn btn-sm btn-outline-primary">Create New</a>
+			<a href="{{ route('accounts.create') }}" class="btn btn-sm btn-outline-primary">Create New</a>
 		</div>
 	</div>
 	<div class="card-body">
@@ -51,8 +51,8 @@ var table = $('#at').DataTable({
 			render: function(id){
 				return `
 					<div class="btn-group btn-group-sm" role="group">
-						<!-- <a href="{{ url('account') }}/${id}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i></a> -->
-						<a href="{{ url('account') }}/${id}/edit" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
+						<!-- <a href="{{ url('accounts') }}/${id}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i></a> -->
+						<a href="{{ url('accounts') }}/${id}/edit" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
 						<button type="button" class="btn btn-sm btn-outline-danger remove" data-id="${id}">
 							<i class="fa fa-trash"></i>
 						</button>
@@ -78,7 +78,7 @@ $(document).on('click', '.remove', function(e){
 	}).then(res=>{
 		if(res.isConfirmed){
 			$.ajax({
-				url: '{{ url("account") }}/'+id,
+				url: '{{ url("accounts") }}/'+id,
 				type: 'DELETE',
 				data: {_token:'{{ csrf_token() }}'},
 				success: ()=> table.ajax.reload(null, false)

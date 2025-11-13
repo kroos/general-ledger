@@ -15,7 +15,7 @@ use App\Models\{
 	YesNoOption, ActivityLog
 };
 use App\Models\Accounting\{
-	Account, AccountType, Ledger, LedgerEntry
+	Account, AccountType, Ledger, Journal, JournalEntry
 };
 
 // load db facade
@@ -57,6 +57,18 @@ use Log;
 class ModelAjaxSupportController extends Controller
 {
 	// this 1 need chunks sooner or later
+	public function getYesNoOptions(Request $request): JsonResponse
+	{
+		$yno = YesNoOption::when($request->search, function (Builder $query) use ($request) {
+													$query->where('option', 'LIKE', '%' . $request->search . '%');
+												})
+												->when($request->id, function($query) use ($request){
+													$query->where('id', $request->id);
+												})
+												->get();
+		return response()->json($yno);
+	}
+
 	public function getActivityLogs(Request $request): JsonResponse
 	{
 		$values = ActivityLog::with('belongstouser')
@@ -72,24 +84,12 @@ class ModelAjaxSupportController extends Controller
 		return response()->json($values);
 	}
 
-	public function getYesNoOptions(Request $request): JsonResponse
-	{
-		$yno = YesNoOption::when($request->search, function (Builder $query) use ($request) {
-													$query->where('option', 'LIKE', '%' . $request->search . '%');
-												})
-												->when($request->id, function($query) use ($request){
-													$query->where('id', $request->id);
-												})
-												->get();
-		return response()->json($yno);
-	}
-
 	public function getAccounts(Request $request): JsonResponse
 	{
 		$accounts = Account::with('belongstoaccounttype')
 												->when($request->search, function (Builder $query) use ($request) {
-													$query->where('option', 'LIKE', '%' . $request->search . '%')
-														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+													$query->where('account', 'LIKE', '%' . $request->search . '%')
+														->orWhere('code','LIKE','%'.$request->search.'%');
 												})
 												->when($request->id, function($query) use ($request){
 													$query->where('id', $request->id);
@@ -113,7 +113,7 @@ class ModelAjaxSupportController extends Controller
 
 	public function getLedgers(Request $request): JsonResponse
 	{
-		$ledgers = Ledger::with(['belongstoaccounttype', 'hasmanyledgerentry', 'hasmanyledgerentrydebit', 'hasmanyledgerentrycredit'])
+		$ledgers = Ledger::with(['belongstoaccounttype', 'hasmanyjournal', 'hasmanyjournalentrydebit', 'hasmanyjournalentrycredit'])
 												->when($request->search, function (Builder $query) use ($request) {
 													$query->where('option', 'LIKE', '%' . $request->search . '%')
 														->orWhere('ip_address','LIKE','%'.$request->search.'%');
@@ -125,18 +125,35 @@ class ModelAjaxSupportController extends Controller
 		return response()->json($ledgers);
 	}
 
-	public function getLedgerEntries(Request $request): JsonResponse
+	public function getJournals(Request $request): JsonResponse
 	{
-		$ledgersentries = LedgerEntry::with(['belongstoledger', 'belongstoaccount', 'belongstoledgerdebit', 'belongstoledgercredit'])
-																	->when($request->search, function (Builder $query) use ($request) {
-																		$query->where('option', 'LIKE', '%' . $request->search . '%')
-																			->orWhere('ip_address','LIKE','%'.$request->search.'%');
-																	})
-																	->when($request->id, function($query) use ($request){
-																		$query->where('id', $request->id);
-																	})
-																	->get();
-		return response()->json($ledgersentries);
+		$journals = Journal::with(['belongstoledger', 'hasmanyjournalentries'])
+												->when($request->search, function (Builder $query) use ($request) {
+													$query->where('option', 'LIKE', '%' . $request->search . '%')
+														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+												})
+												->when($request->id, function($query) use ($request){
+													$query->where('id', $request->id);
+												})
+												->get();
+		return response()->json($journals);
 	}
 
+	public function getJournalEntries(Request $request): JsonResponse
+	{
+		$journalentries = JournalEntry::with(['belongstojournal', 'belongstoaccount', 'belongstoledgerdebit', 'belongstoledgercredit'])
+												->when($request->search, function (Builder $query) use ($request) {
+													$query->where('option', 'LIKE', '%' . $request->search . '%')
+														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+												})
+												->when($request->id, function($query) use ($request){
+													$query->where('id', $request->id);
+												})
+												->get();
+		return response()->json($journalentries);
+	}
+
+
+
 }
+

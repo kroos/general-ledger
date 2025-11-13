@@ -82,7 +82,7 @@ class AccountTypeController extends Controller
 			'description' => 'Description'
 		]);
 		AccountType::create($request->only(['account_type', 'description']));
-		return redirect()->route('account-type.index')->with('success', 'Data save');
+		return redirect()->route('account-types.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -117,7 +117,7 @@ class AccountTypeController extends Controller
 			'description' => 'Description'
 		]);
 		$accountType->update($request->only(['account_type', 'description']));
-		return redirect()->route('account-type.index')->with('success', 'Data save');
+		return redirect()->route('account-types.index')->with('success', 'Data save');
 	}
 
 	/**

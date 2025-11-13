@@ -16,12 +16,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // load helper
 use Illuminate\Support\Str;
 
-class Ledger extends Model
+class Journal extends Model
 {
 	//
 	use SoftDeletes;
 	// protected $connection = '';
-	protected $table = 'ledgers';
+	protected $table = 'journals';
 	// protected $primaryKey = '';
 	// public $incrementing = false;
 	// protected $keyType = '';
@@ -35,36 +35,26 @@ class Ledger extends Model
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// set column attribute
-	public function setLedgerAttribute($value)
+	public function setNoReferenceAttribute($value)
 	{
-		$this->attributes['ledger'] = ucwords(Str::lower($value));
+		$this->attributes['no_reference'] = Str::upper(Str::lower($value));
 	}
 
 	public function setDescriptionAttribute($value)
 	{
-		$this->attributes['description'] = ucwords(Str::lower($value));
+		$this->attributes['description'] = ucfirst(Str::lower($value));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// relationship
-	public function belongstoaccounttype(): BelongsTo
+	public function belongstoledger(): BelongsTo
 	{
-		return $this->BelongsTo(\App\Models\Accounting\AccountType::class, 'account_type_id');
+		return $this->BelongsTo(\App\Models\Accounting\Ledger::class, 'ledger_id');
 	}
 
-	public function hasmanyjournal(): HasMany
+	public function hasmanyjournalentries(): HasMany
 	{
-		return $this->HasMany(\App\Models\Accounting\Journal::class, 'ledger_id');
-	}
-
-	public function hasmanyjournalentrydebit(): HasMany
-	{
-		return $this->HasMany(\App\Models\Accounting\JournalEntry::class, 'ledger_debit_id');
-	}
-
-	public function hasmanyjournalentrycredit(): HasMany
-	{
-		return $this->HasMany(\App\Models\Accounting\JournalEntry::class, 'ledger_credit_id');
+		return $this->HasMany(\App\Models\Accounting\JournalEntry::class, 'journal_id');
 	}
 
 }

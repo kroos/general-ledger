@@ -86,7 +86,7 @@ class LedgerController extends Controller
 			'description' => 'Description'
 		]);
 		Ledger::create($request->only(['account_type_id', 'ledger', 'code', 'description']));
-		return redirect()->route('ledger.index')->with('success', 'Data save');
+		return redirect()->route('ledgers.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -124,7 +124,7 @@ class LedgerController extends Controller
 			'description' => 'Description'
 		]);
 		$ledger->update($request->only(['account_type_id', 'ledger', 'description']));
-		return redirect()->route('ledger.index')->with('success', 'Data save');
+		return redirect()->route('ledgers.index')->with('success', 'Data save');
 	}
 
 	/**

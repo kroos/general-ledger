@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<form method="POST" action="{{ route('account.store') }}" accept-charset="UTF-8" id="form" autocomplete="off" class="" enctype="multipart/form-data">
+<form method="POST" action="{{ route('accounts.store') }}" accept-charset="UTF-8" id="form" autocomplete="off" class="" enctype="multipart/form-data">
 	@csrf
 	<div class="card">
 		<div class="card-header d-flex justify-content-between">
@@ -17,7 +17,7 @@
 				<button type="submit" class="btn btn-sm btn-outline-primary">Submit</button>
 			</div>
 			<div class="m-1">
-				<a href="{{ route('account.index') }}" class="btn btn-sm btn-outline-secondary">Cancel</a>
+				<a href="{{ route('accounts.index') }}" class="btn btn-sm btn-outline-secondary">Cancel</a>
 			</div>
 		</div>
 	</div>

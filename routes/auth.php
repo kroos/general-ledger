@@ -68,13 +68,13 @@ Route::middleware('auth')->group(function () {
 // 	Route::delete('/{accountType}', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'destroy'])->name('destroy');
 // });
 
-Route::resource('account-type', App\Http\Controllers\Accounting\AccountTypeController::class);
-Route::resource('account', App\Http\Controllers\Accounting\AccountController::class);
-Route::resource('ledger', App\Http\Controllers\Accounting\LedgerController::class);
+Route::resource('account-types', App\Http\Controllers\Accounting\AccountTypeController::class);
+Route::resource('accounts', App\Http\Controllers\Accounting\AccountController::class);
+Route::resource('ledgers', App\Http\Controllers\Accounting\LedgerController::class);
 
 
 
-Route::resource('journal', App\Http\Controllers\Accounting\JournalController::class);
+Route::resource('journals', App\Http\Controllers\Accounting\JournalController::class);
 
 
 
