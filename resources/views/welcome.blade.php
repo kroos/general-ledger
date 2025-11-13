@@ -67,7 +67,7 @@
 <div class="col-sm-12 row justify-content-center align-items-center my-2 m-0 border border-success">
 	<h2>1 And 2 Tier Dynamic Inputs (with Form)</h2>
 
-	<form id="myForm" action="{{ route('welcome') }}" method="post">
+	<form id="form" action="{{ route('welcome') }}" method="post">
 		@csrf
 		@include('_form')
 	</form>
@@ -756,6 +756,24 @@ let calendar = new Calendar(calendarEl, {
 
 	});
 	calendar.render();
+
+	///////////////////////////////////////////////////////////////////////////////////////////
+	// form validation
+	$('#form').bootstrapValidator({
+		fields: {
+			account_type: {
+				validators: {
+					notEmpty: {
+						message: 'Please insert'
+					},
+				}
+			},
+			description: {
+				validators: {
+				}
+			},
+		}
+	});
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	@endsection

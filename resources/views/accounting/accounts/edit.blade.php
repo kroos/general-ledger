@@ -7,11 +7,11 @@
 	<div class="card">
 		<div class="card-header d-flex justify-content-between">
 			<div class="text-dark text-secondary">
-				<h6>Edit Accounth6>
+				<h6>Edit Account</h6>
 			</div>
 		</div>
 		<div class="card-body">
-			body
+			@include('accounting.accounts._form')
 		</div>
 		<div class="card-footer d-flex justify-content-end">
 			<div class="m-1">
@@ -26,4 +26,5 @@
 @endsection
 
 @section('js')
+	@include('accounting.accounts._js')
 @endsection

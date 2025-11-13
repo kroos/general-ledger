@@ -72,7 +72,24 @@ class AccountController extends Controller
 	 */
 	public function store(Request $request): RedirectResponse
 	{
-		//
+		$request->validate([
+			'account_type_id' => 'required|integer',
+			'account' => 'required|string',
+			'code' => 'required|numeric',
+			'description' => 'nullable|string'
+		],[
+			// 'account_type_id' => '',
+			// 'account' => '',
+			// 'code' => '',
+			// 'description' => ''
+		],[
+			'account_type_id' => 'Account Type',
+			'account' => 'Account',
+			'code' => 'Code',
+			'description' => 'Description'
+		]);
+		Account::create($request->only(['account_type_id', 'account', 'code', 'description']));
+		return redirect()->route('account.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -96,7 +113,24 @@ class AccountController extends Controller
 	 */
 	public function update(Request $request, Account $account): RedirectResponse
 	{
-		//
+		$request->validate([
+			'account_type_id' => 'required|integer',
+			'account' => 'required|string',
+			'code' => 'required|numeric',
+			'description' => 'nullable|string'
+		],[
+			// 'account_type_id' => '',
+			// 'account' => '',
+			// 'code' => '',
+			// 'description' => ''
+		],[
+			'account_type_id' => 'Account Type',
+			'account' => 'Account',
+			'code' => 'Code',
+			'description' => 'Description'
+		]);
+		$account->update($request->only(['account_type_id', 'account', 'code', 'description']));
+		return redirect()->route('account.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -104,6 +138,7 @@ class AccountController extends Controller
 	 */
 	public function destroy(Account $account): JsonResponse
 	{
-		//
+		$account->delete();
+		return response()->json(['success' => 'Data delete']);
 	}
 }

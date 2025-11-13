@@ -37,34 +37,34 @@ class Ledger extends Model
 	// set column attribute
 	public function setLedgerAttribute($value)
 	{
-	    $this->attributes['ledger'] = ucwords(Str::lower($value));
+		$this->attributes['ledger'] = ucwords(Str::lower($value));
 	}
 
 	public function setDescriptionAttribute($value)
 	{
-	    $this->attributes['description'] = ucwords(Str::lower($value));
+		$this->attributes['description'] = ucwords(Str::lower($value));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// relationship
 	public function belongstoaccounttype(): BelongsTo
 	{
-		$this->BelongsTo(\App\Models\Accounting\AccountType, 'account_type_id');
+		return $this->BelongsTo(\App\Models\Accounting\AccountType::class, 'account_type_id');
 	}
 
 	public function hasmanyledgerentry(): HasMany
 	{
-		$this->HasMany(\App\Models\Accounting\LedgerEntry, 'ledger_id');
+		return $this->HasMany(\App\Models\Accounting\LedgerEntry::class, 'ledger_id');
 	}
 
 	public function hasmanyledgerentrydebit(): HasMany
 	{
-		$this->HasMany(\App\Models\Accounting\LedgerEntry, 'ledger_debit_id');
+		return $this->HasMany(\App\Models\Accounting\LedgerEntry::class, 'ledger_debit_id');
 	}
 
 	public function hasmanyledgerentrycredit(): HasMany
 	{
-		$this->HasMany(\App\Models\Accounting\LedgerEntry, 'ledger_credit_id');
+		return $this->HasMany(\App\Models\Accounting\LedgerEntry::class, 'ledger_credit_id');
 	}
 
 }

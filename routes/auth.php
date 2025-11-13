@@ -36,7 +36,6 @@ Route::middleware(['auth', 'password.confirm'])->group(function () {
 	Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 	Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 	Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
 });
 
 Route::middleware('auth')->group(function () {
@@ -72,7 +71,6 @@ Route::middleware('auth')->group(function () {
 Route::resource('account-type', App\Http\Controllers\Accounting\AccountTypeController::class);
 Route::resource('account', App\Http\Controllers\Accounting\AccountController::class);
 Route::resource('ledger', App\Http\Controllers\Accounting\LedgerController::class);
-Route::resource('ledger-entry', App\Http\Controllers\Accounting\LedgerEntryController::class);
 
 
 

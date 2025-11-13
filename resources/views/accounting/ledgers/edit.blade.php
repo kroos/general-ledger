@@ -11,7 +11,7 @@
 			</div>
 		</div>
 		<div class="card-body">
-			body
+			@include('accounting.ledgers._form')
 		</div>
 		<div class="card-footer d-flex justify-content-end">
 			<div class="m-1">
@@ -26,4 +26,5 @@
 @endsection
 
 @section('js')
+	@include('accounting.ledgers._js')
 @endsection

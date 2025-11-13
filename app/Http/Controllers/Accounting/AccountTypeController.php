@@ -17,7 +17,6 @@ use App\Models\Accounting\AccountType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
-
 // load validation
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -72,7 +71,18 @@ class AccountTypeController extends Controller
 	 */
 	public function store(Request $request): RedirectResponse
 	{
-		//
+		$request->validate([
+			'account_type' => 'required|string',
+			'description' => 'nullable|string'
+		],[
+			// 'account_type' => '',
+			// 'description' => ''
+		],[
+			'account_type' => 'Account Type',
+			'description' => 'Description'
+		]);
+		AccountType::create($request->only(['account_type', 'description']));
+		return redirect()->route('account-type.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -96,7 +106,18 @@ class AccountTypeController extends Controller
 	 */
 	public function update(Request $request, AccountType $accountType): RedirectResponse
 	{
-		//
+		$request->validate([
+			'account_type' => 'required|string',
+			'description' => 'nullable|string'
+		],[
+			// 'account_type' => '',
+			// 'description' => ''
+		],[
+			'account_type' => 'Account Type',
+			'description' => 'Description'
+		]);
+		$accountType->update($request->only(['account_type', 'description']));
+		return redirect()->route('account-type.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -104,6 +125,7 @@ class AccountTypeController extends Controller
 	 */
 	public function destroy(AccountType $accountType): JsonResponse
 	{
-		//
+		$accountType->delete();
+		return response()->json(['success' => 'Data deleted']);
 	}
 }

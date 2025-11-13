@@ -11,7 +11,7 @@
 		</div>
 	</div>
 	<div class="card-body">
-		body
+		{{ $accountType }}
 	</div>
 	<div class="card-footer">
 		footer

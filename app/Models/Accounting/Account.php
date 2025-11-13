@@ -30,7 +30,7 @@ class Account extends Model
 	// protected $rememberTokenName = '';
 
 	protected $casts = [
-		'code' => 'decimal',
+		// 'code' => 'decimal',
 	];
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,6 +49,6 @@ class Account extends Model
 	// relationship
 		public function belongstoaccounttype(): BelongsTo
 		{
-			$this->BelongsTo(\App\Models\Accounting\AccountType, 'account_type_id');
+			return $this->BelongsTo(\App\Models\Accounting\AccountType::class, 'account_type_id');
 		}
 }

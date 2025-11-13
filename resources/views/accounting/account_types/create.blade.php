@@ -10,7 +10,7 @@
 			</div>
 		</div>
 		<div class="card-body">
-			body
+			@include('accounting.account_types._form')
 		</div>
 		<div class="card-footer d-flex justify-content-end">
 			<div class="m-1">
@@ -25,4 +25,5 @@
 @endsection
 
 @section('js')
+	@include('accounting.account_types._js')
 @endsection

@@ -72,7 +72,21 @@ class LedgerController extends Controller
 	 */
 	public function store(Request $request): RedirectResponse
 	{
-		//
+		$request->validate([
+			'account_type_id' => 'required|integer',
+			'ledger' => 'required|string',
+			'description' => 'nullable|string'
+		],[
+			// 'account_type_id' => '',
+			// 'ledger' => '',
+			// 'description' => ''
+		],[
+			'account_type_id' => 'Account Type',
+			'ledger' => 'Ledger',
+			'description' => 'Description'
+		]);
+		Ledger::create($request->only(['account_type_id', 'ledger', 'code', 'description']));
+		return redirect()->route('ledger.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -96,7 +110,21 @@ class LedgerController extends Controller
 	 */
 	public function update(Request $request, Ledger $ledger): RedirectResponse
 	{
-		//
+		$request->validate([
+			'account_type_id' => 'required|integer',
+			'ledger' => 'required|string',
+			'description' => 'nullable|string'
+		],[
+			// 'account_type_id' => '',
+			// 'ledger' => '',
+			// 'description' => ''
+		],[
+			'account_type_id' => 'Account Type',
+			'ledger' => 'Ledger',
+			'description' => 'Description'
+		]);
+		$ledger->update($request->only(['account_type_id', 'ledger', 'description']));
+		return redirect()->route('ledger.index')->with('success', 'Data save');
 	}
 
 	/**
@@ -104,6 +132,8 @@ class LedgerController extends Controller
 	 */
 	public function destroy(Ledger $ledger): JsonResponse
 	{
-		//
+		// careful with this one
+		// $ledger->delete();
+		return response()->json(['success' => 'Data delete']);
 	}
 }

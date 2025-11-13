@@ -48,4 +48,20 @@ Route::middleware('guest')->group(function () {
 
 });
 
+// for testing purposes
+// Route::controller(App\Http\Controllers\API\ModelAjaxSupportController::class)->group(function () {
+// 	Route::get('/getActivityLogs', 'getActivityLogs')->name('getActivityLogs');
+// 	Route::get('/getYesNoOptions', 'getYesNoOptions')->name('getYesNoOptions');
+// 	Route::get('/getAccounts', 'getAccounts')->name('getAccounts');
+// 	Route::get('/getAccountTypes', 'getAccountTypes')->name('getAccountTypes');
+// 	Route::get('/getLedgers', 'getLedgers')->name('getLedgers');
+// 	Route::get('/getLedgerEntries', 'getLedgerEntries')->name('getLedgerEntries');
+// });
+
+
+
+
+
+
+
 require __DIR__.'/auth.php';

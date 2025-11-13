@@ -20,7 +20,7 @@ class LedgerEntry extends Model
 {
 	//
 	use SoftDeletes;
-	protected $connection = 'ledger_entries';
+	// protected $connection = '';
 	protected $table = 'ledger_entries';
 	// protected $primaryKey = '';
 	// public $incrementing = false;
@@ -39,39 +39,39 @@ class LedgerEntry extends Model
 	// set column attribute
 	public function setReferenceAttribute($value)
 	{
-	    $this->attributes['reference'] = Str::upper(Str::lower($value));
+		$this->attributes['reference'] = Str::upper(Str::lower($value));
 	}
 
 	public function setDescriptionDebitAttribute($value)
 	{
-	    $this->attributes['description_debit'] = ucwords(Str::lower($value));
+		$this->attributes['description_debit'] = ucwords(Str::lower($value));
 	}
 
 	public function setDescriptionCreditAttribute($value)
 	{
-	    $this->attributes['description_credit'] = ucwords(Str::lower($value));
+		$this->attributes['description_credit'] = ucwords(Str::lower($value));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// relationship
 	public function belongstoledger(): BelongsTo
 	{
-		$this->BelongsTo(App\Models\Accounting\Ledger, 'ledger_id');
+		return $this->BelongsTo(App\Models\Accounting\Ledger::class, 'ledger_id');
 	}
 
 	public function belongstoaccount(): BelongsTo
 	{
-		$this->BelongsTo(App\Models\Accounting\Account, 'account_id');
+		return $this->BelongsTo(App\Models\Accounting\Account::class, 'account_id');
 	}
 
 	public function belongstoledgerdebit(): BelongsTo
 	{
-		$this->BelongsTo(App\Models\Accounting\Ledger, 'ledger_debit_id');
+		return $this->BelongsTo(App\Models\Accounting\Ledger::class, 'ledger_debit_id');
 	}
 
 	public function belongstoledgercredit(): BelongsTo
 	{
-		$this->BelongsTo(App\Models\Accounting\Ledger, 'ledger_credit_id');
+		return $this->BelongsTo(App\Models\Accounting\Ledger::class, 'ledger_credit_id');
 	}
 
 }

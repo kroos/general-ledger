@@ -86,7 +86,8 @@ class ModelAjaxSupportController extends Controller
 
 	public function getAccounts(Request $request): JsonResponse
 	{
-		$accounts = Account::when($request->search, function (Builder $query) use ($request) {
+		$accounts = Account::with('belongstoaccounttype')
+												->when($request->search, function (Builder $query) use ($request) {
 													$query->where('option', 'LIKE', '%' . $request->search . '%')
 														->orWhere('ip_address','LIKE','%'.$request->search.'%');
 												})
@@ -99,20 +100,21 @@ class ModelAjaxSupportController extends Controller
 
 	public function getAccountTypes(Request $request): JsonResponse
 	{
-		$accounttypes = AccountType::when($request->search, function (Builder $query) use ($request) {
-													$query->where('option', 'LIKE', '%' . $request->search . '%')
-														->orWhere('ip_address','LIKE','%'.$request->search.'%');
-												})
-												->when($request->id, function($query) use ($request){
-													$query->where('id', $request->id);
-												})
-												->get();
+		$accounttypes = AccountType::with('hasmanyaccount')
+																->when($request->search, function (Builder $query) use ($request) {
+																	$query->where('account_type', 'LIKE', '%' . $request->search . '%');
+																})
+																->when($request->id, function($query) use ($request){
+																	$query->where('id', $request->id);
+																})
+																->get();
 		return response()->json($accounttypes);
 	}
 
 	public function getLedgers(Request $request): JsonResponse
 	{
-		$ledgers = Ledger::when($request->search, function (Builder $query) use ($request) {
+		$ledgers = Ledger::with(['belongstoaccounttype', 'hasmanyledgerentry', 'hasmanyledgerentrydebit', 'hasmanyledgerentrycredit'])
+												->when($request->search, function (Builder $query) use ($request) {
 													$query->where('option', 'LIKE', '%' . $request->search . '%')
 														->orWhere('ip_address','LIKE','%'.$request->search.'%');
 												})
@@ -125,14 +127,15 @@ class ModelAjaxSupportController extends Controller
 
 	public function getLedgerEntries(Request $request): JsonResponse
 	{
-		$ledgersentries = LedgerEntry::when($request->search, function (Builder $query) use ($request) {
-													$query->where('option', 'LIKE', '%' . $request->search . '%')
-														->orWhere('ip_address','LIKE','%'.$request->search.'%');
-												})
-												->when($request->id, function($query) use ($request){
-													$query->where('id', $request->id);
-												})
-												->get();
+		$ledgersentries = LedgerEntry::with(['belongstoledger', 'belongstoaccount', 'belongstoledgerdebit', 'belongstoledgercredit'])
+																	->when($request->search, function (Builder $query) use ($request) {
+																		$query->where('option', 'LIKE', '%' . $request->search . '%')
+																			->orWhere('ip_address','LIKE','%'.$request->search.'%');
+																	})
+																	->when($request->id, function($query) use ($request){
+																		$query->where('id', $request->id);
+																	})
+																	->get();
 		return response()->json($ledgersentries);
 	}
 

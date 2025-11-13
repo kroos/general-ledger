@@ -7,6 +7,11 @@
 <li class="nav-item">
 	<a class="nav-link" href="{{ route('ledger.index') }}">Ledger</a>
 </li>
+<li class="nav-item">
+	<a class="nav-link" href="{{ route('activity-logs.index') }}">Activity Logs</a>
+</li>
+
+
 <li class="nav-item dropdown">
 	<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
 	<div class="dropdown-menu">
@@ -16,8 +21,4 @@
 		<div class="dropdown-divider"></div>
 		<a class="dropdown-item" href="#">Separated link</a>
 	</div>
-</li>
-
-<li class="nav-item">
-	<a class="nav-link" href="{{ route('activity-logs.index') }}">Activity Logs</a>
 </li>

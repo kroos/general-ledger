@@ -37,18 +37,18 @@ class AccountType extends Model
 	// set column attribute
 	public function setAccountTypeAttribute($value)
 	{
-	    $this->attributes['account_type'] = ucwords(Str::lower($value));
+		$this->attributes['account_type'] = ucwords(Str::lower($value));
 	}
 
 	public function setDescriptionAttribute($value)
 	{
-	    $this->attributes['description'] = ucwords(Str::lower($value));
+		return $this->attributes['description'] = ucwords(Str::lower($value));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// relationship
 	public function hasmanyaccount(): HasMany
 	{
-		$this->HasMany(\App\Models\Accounting\Account, 'account_type_id');
+		return $this->HasMany(\App\Models\Accounting\Account::class, 'account_type_id');
 	}
 }
