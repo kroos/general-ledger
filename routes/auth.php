@@ -74,6 +74,10 @@ Route::resource('ledger', App\Http\Controllers\Accounting\LedgerController::clas
 
 
 
+Route::resource('journal', App\Http\Controllers\Accounting\JournalController::class);
+
+
+
 
 
 
