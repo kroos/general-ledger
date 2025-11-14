@@ -30,7 +30,7 @@ class Journal extends Model
 	// protected $rememberTokenName = '';
 
 	protected $casts = [
-		'date' => 'datetime',
+		'date' => 'date',
 	];
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -43,7 +43,7 @@ var table = $('#at').DataTable({
 		{ data: 'id', title: 'ID' },
 		{ data: 'belongstoaccounttype.account_type', title: 'Account Type' },
 		{ data: 'ledger', title: 'Ledger', defaultContent: '-' },
-		{ data: 'Description', title: 'Description', defaultContent: '-', orderable: false, searchable:false },
+		{ data: 'description', title: 'Description', defaultContent: '-', orderable: false, searchable:false },
 		{
 			data: 'id',
 			title: '#',

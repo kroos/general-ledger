@@ -135,7 +135,7 @@ class ModelAjaxSupportController extends Controller
 												->when($request->id, function($query) use ($request){
 													$query->where('id', $request->id);
 												})
-												->get();
+												->get()->toArray();
 		return response()->json($journals);
 	}
 

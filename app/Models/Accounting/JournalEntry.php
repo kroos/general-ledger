@@ -32,7 +32,7 @@ class JournalEntry extends Model
 	protected $casts = [
 		'debit' => 'decimal:2',
 		'credit' => 'decimal:2',
-		'date' => 'datetime',
+		'date' => 'date',
 	];
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
