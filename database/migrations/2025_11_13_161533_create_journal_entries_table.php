@@ -18,14 +18,11 @@ return new class extends Migration
 			$table->datetime('date')->nullable();
 			$table->foreignId('journal_id')->constrained('journals')->cascadeOnDelete();
 			$table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
-			$table->text('description_debit')->nullable();
-			$table->string('no_reference_debit')->nullable();
-			$table->foreignId('ledger_debit_id')->nullable()->constrained('ledgers')->cascadeOnDelete();
+			$table->text('description')->nullable();
+			$table->string('no_reference')->nullable();
+			$table->foreignId('ledger_id')->nullable()->constrained('ledgers')->cascadeOnDelete();
 			$table->decimal('debit', 15, 2)->default(0);
 			$table->decimal('credit', 15, 2)->default(0);
-			$table->foreignId('ledger_credit_id')->nullable()->constrained('ledgers')->cascadeOnDelete();
-			$table->string('no_reference_credit')->nullable();
-			$table->text('description_credit')->nullable();
 			$table->timestamps();
 			$table->softDeletes();
 		});

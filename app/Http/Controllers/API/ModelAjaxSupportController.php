@@ -113,7 +113,7 @@ class ModelAjaxSupportController extends Controller
 
 	public function getLedgers(Request $request): JsonResponse
 	{
-		$ledgers = Ledger::with(['belongstoaccounttype', 'hasmanyjournal', 'hasmanyjournalentrydebit', 'hasmanyjournalentrycredit'])
+		$ledgers = Ledger::with(['belongstoaccounttype', 'hasmanyjournal'])
 												->when($request->search, function (Builder $query) use ($request) {
 													$query->where('option', 'LIKE', '%' . $request->search . '%')
 														->orWhere('ip_address','LIKE','%'.$request->search.'%');
@@ -141,10 +141,10 @@ class ModelAjaxSupportController extends Controller
 
 	public function getJournalEntries(Request $request): JsonResponse
 	{
-		$journalentries = JournalEntry::with(['belongstojournal', 'belongstoaccount', 'belongstoledgerdebit', 'belongstoledgercredit'])
+		$journalentries = JournalEntry::with(['belongstojournal', 'belongstoaccount', 'belongstoledger'])
 												->when($request->search, function (Builder $query) use ($request) {
-													$query->where('option', 'LIKE', '%' . $request->search . '%')
-														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+													$query->where('no_reference', 'LIKE', '%' . $request->search . '%')
+														->orWhere('description','LIKE','%'.$request->search.'%');
 												})
 												->when($request->id, function($query) use ($request){
 													$query->where('id', $request->id);

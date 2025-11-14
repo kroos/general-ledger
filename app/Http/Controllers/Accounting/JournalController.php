@@ -81,32 +81,12 @@ class JournalController extends Controller
 												'journals.*.id' => 'nullable',
 												'journals.*.date' => 'required|date_format:Y-m-d',
 												'journals.*.account_id' => 'required',
-												// 'journals.*.description_debit' => 'nullable|string',
-												'journals.*.no_reference_debit' => 'nullable|string',
-												'journals.*.ledger_debit_id' => 'required_without:journals.*.ledger_credit_id|nullable',
+												'journals.*.description' => 'nullable|string',
+												'journals.*.no_reference' => 'nullable|string',
+												'journals.*.ledger_id' => 'required_without:journals.*.ledger_credit_id|nullable',
 												'journals.*.debit' => 'required_without:journals.*.credit|nullable',
 												'journals.*.credit' => 'required_without:journals.*.debit|nullable',
-												'journals.*.ledger_credit_id' => 'required_without:journals.*.ledger_debit_id|nullable',
-												'journals.*.no_reference_credit' => 'nullable|string',
-												// 'journals.*.description_credit' => 'nullable|string',
-											],[
-												// 'ledger_id' => '',
-												// 'date' => '',
-												// 'no_reference' => '',
-												// 'description' => '',
-												// 'journals' => '',
-												// 'journals.*.id' => '',
-												// 'journals.*.date' => '',
-												// 'journals.*.account_id' => '',
-												// 'journals.*.description_debit' => '',
-												// 'journals.*.no_reference_debit' => '',
-												// 'journals.*.ledger_debit_id' => '',
-												// 'journals.*.debit' => '',
-												// 'journals.*.credit' => '',
-												// 'journals.*.ledger_credit_id' => '',
-												// 'journals.*.no_reference_credit' => '',
-												// 'journals.*.description_credit' => '',
-											],[
+											],[],[
 												'ledger_id' => 'Ledger',
 												'date' => 'Date',
 												'no_reference' => 'No Reference',
@@ -115,14 +95,11 @@ class JournalController extends Controller
 												'journals.*.id' => '',
 												'journals.*.date' => 'Journal Date',
 												'journals.*.account_id' => 'Journal Account',
-												// 'journals.*.description_debit' => 'Journal Description',
-												'journals.*.no_reference_debit' => 'Journal No Reference',
-												'journals.*.ledger_debit_id' => 'Journal Ledger',
+												'journals.*.description' => 'Journal Description',
+												'journals.*.no_reference' => 'Journal No Reference',
+												'journals.*.ledger_id' => 'Journal Ledger',
 												'journals.*.debit' => 'Journal Debit',
 												'journals.*.credit' => 'Journal Credit',
-												'journals.*.ledger_credit_id' => 'Journal Ledger',
-												'journals.*.no_reference_credit' => 'Journal No Reference',
-												// 'journals.*.description_credit' => 'Journal Description',
 											]);
 		$led = Journal::create($request->only(['ledger_id', 'date', 'no_reference', 'description']));
 		foreach ($request->journals ?? [] as $journal) {
@@ -153,7 +130,53 @@ class JournalController extends Controller
 	 */
 	public function update(Request $request, Journal $journal): RedirectResponse
 	{
-		// return redirect()->route('journals.index')->with('success', 'Data Save');
+		// dd($request->all());
+		$request->validate([
+												'ledger_id' => 'required',
+												'date' => 'required|date_format:Y-m-d',
+												'no_reference' => 'nullable|string',
+												'description' => 'nullable|string',
+												'journals' => 'required|array|min:1',
+												'journals.*.id' => 'nullable',
+												'journals.*.date' => 'required|date_format:Y-m-d',
+												'journals.*.account_id' => 'required',
+												'journals.*.description' => 'nullable|string',
+												'journals.*.no_reference' => 'nullable|string',
+												'journals.*.ledger_id' => 'required_without:journals.*.ledger_credit_id|nullable',
+												'journals.*.debit' => 'required_without:journals.*.credit|nullable',
+												'journals.*.credit' => 'required_without:journals.*.debit|nullable',
+											],[],[
+												'ledger_id' => 'Ledger',
+												'date' => 'Date',
+												'no_reference' => 'No Reference',
+												'description' => 'Description',
+												'journals' => 'Journals',
+												'journals.*.id' => '',
+												'journals.*.date' => 'Journal Date',
+												'journals.*.account_id' => 'Journal Account',
+												'journals.*.description' => 'Journal Description',
+												'journals.*.no_reference' => 'Journal No Reference',
+												'journals.*.ledger_id' => 'Journal Ledger',
+												'journals.*.debit' => 'Journal Debit',
+												'journals.*.credit' => 'Journal Credit',
+											]);
+		$journal->update($request->only(['ledger_id', 'date', 'no_reference', 'description']));
+
+    foreach ($request->journals as $entryData) {
+        $journal->hasmanyjournalentries()->updateOrCreate(
+            ['id' => $entryData['id'] ?? null],
+            $entryData
+        );
+    }
+
+		// foreach ($request->journals ?? [] as $journal) {
+		// 	$journal->hasmanyjournalentries()->updateOrCreate(
+		// 		['id' => $journal['id'] ?? null],
+		// 		$journal
+		// 	);
+		// }
+
+		return redirect()->route('journals.index')->with('success', 'Data Updated');
 	}
 
 	/**

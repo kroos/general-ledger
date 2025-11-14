@@ -52,14 +52,11 @@
 		<tr>
 			<th>Date</th>
 			<th>Account</th>
-			<!-- <th>Description</th> -->
-			<th>No Reference (Debit)</th>
-			<th>Journal (Debit)</th>
+			<th>Description</th>
+			<th>No Reference</th>
+			<th>Journal</th>
 			<th>Debit</th>
 			<th>Credit</th>
-			<th>Journal (Credit)</th>
-			<th>No Reference (Credit)</th>
-			<!-- <th>Description</th> -->
 			<th>
 				<button type="button" class="btn btn-sm btn-outline-primary" id="journal_add"><i class="fa-solid fa-folder-plus"></i></button>
 			</th>

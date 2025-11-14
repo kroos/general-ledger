@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 // use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 // use Illuminate\Database\Eloquent\Relations\HasMany;
 // use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-// use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 // load helper
@@ -37,24 +37,14 @@ class JournalEntry extends Model
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// set column attribute
-	public function setNoReferenceDebitAttribute($value)
+	public function setNoReferenceAttribute($value)
 	{
-		$this->attributes['no_reference_debit'] = Str::upper(Str::lower($value));
+		$this->attributes['no_reference'] = Str::upper(Str::lower($value));
 	}
 
-	public function setNoReferenceCreitAttribute($value)
+	public function setDescriptionAttribute($value)
 	{
-		$this->attributes['no_reference_credit'] = Str::upper(Str::lower($value));
-	}
-
-	public function setDescriptionDebitAttribute($value)
-	{
-		$this->attributes['description_debit'] = ucfirst(Str::lower($value));
-	}
-
-	public function setDescriptionCreditAttribute($value)
-	{
-		$this->attributes['description_credit'] = ucfirst(Str::lower($value));
+		$this->attributes['description'] = ucfirst(Str::lower($value));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,14 +60,9 @@ class JournalEntry extends Model
 		return $this->BelongsTo(App\Models\Accounting\Account::class, 'account_id');
 	}
 
-	public function belongstoledgerdebit(): BelongsTo
+	public function belongstoledger(): BelongsTo
 	{
-		return $this->BelongsTo(App\Models\Accounting\Ledger::class, 'ledger_debit_id');
-	}
-
-	public function belongstoledgercredit(): BelongsTo
-	{
-		return $this->BelongsTo(App\Models\Accounting\Ledger::class, 'ledger_credit_id');
+		return $this->BelongsTo(App\Models\Accounting\Ledger::class, 'ledger_id');
 	}
 
 }

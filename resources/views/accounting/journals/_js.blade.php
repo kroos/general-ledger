@@ -75,25 +75,25 @@ $("#journals_wrap").remAddRow({
 					</div>
 				@enderror
 			</td>
-			<!-- <td class="form-group @error('journals.*.description_debit') has-error @enderror">
-				<input type="text" name="${name}[${i}][description_debit]" value="" id="description_debit_${i}" class="form-control form-control-sm @error('journals.*.description_debit') is-invalid @enderror" placeholder="Description Debit">
-				@error('journals.*.description_debit')
-					<div class="invalid-feedback">
-						{{ $message }}
-					</div>
-				@enderror
-			</td> -->
-			<td class="form-group @error('journals.*.no_reference_debit') has-error @enderror">
-				<input type="text" name="${name}[${i}][no_reference_debit]" value="" id="no_reference_debit_${i}" class="form-control form-control-sm @error('journals.*.no_reference_debit') is-invalid @enderror" placeholder="No Reference Credit">
-				@error('journals.*.no_reference_debit')
+			<td class="form-group @error('journals.*.description') has-error @enderror">
+				<input type="text" name="${name}[${i}][description]" value="" id="description_${i}" class="form-control form-control-sm @error('journals.*.description') is-invalid @enderror" placeholder="Description">
+				@error('journals.*.description')
 					<div class="invalid-feedback">
 						{{ $message }}
 					</div>
 				@enderror
 			</td>
-			<td class="form-group @error('journals.*.ledger_debit_id') has-error @enderror">
-				<select name="${name}[${i}][ledger_debit_id]" id="ledger_debit_id_${i}" class="form-select form-select-sm @error('journals.*.ledger_debit_id') is-invalid @enderror"></select>
-				@error('journals.*.ledger_debit_id')
+			<td class="form-group @error('journals.*.no_reference') has-error @enderror">
+				<input type="text" name="${name}[${i}][no_reference]" value="" id="no_reference_${i}" class="form-control form-control-sm @error('journals.*.no_reference') is-invalid @enderror" placeholder="No Reference">
+				@error('journals.*.no_reference')
+					<div class="invalid-feedback">
+						{{ $message }}
+					</div>
+				@enderror
+			</td>
+			<td class="form-group @error('journals.*.ledger_id') has-error @enderror">
+				<select name="${name}[${i}][ledger_id]" id="ledger_id_${i}" class="form-select form-select-sm @error('journals.*.ledger_id') is-invalid @enderror"></select>
+				@error('journals.*.ledger_id')
 					<div class="invalid-feedback">
 						{{ $message }}
 					</div>
@@ -115,30 +115,6 @@ $("#journals_wrap").remAddRow({
 					</div>
 				@enderror
 			</td>
-			<td class="form-group @error('journals.*.ledger_credit_id') has-error @enderror">
-				<select name="${name}[${i}][ledger_credit_id]" id="ledger_credit_id_${i}" class="form-select form-select-sm @error('journals.*.ledger_credit_id') is-invalid @enderror"></select>
-				@error('journals.*.ledger_credit_id')
-					<div class="invalid-feedback">
-						{{ $message }}
-					</div>
-				@enderror
-			</td>
-			<td class="form-group @error('journals.*.no_reference_credit') has-error @enderror">
-				<input type="text" name="${name}[${i}][no_reference_credit]" value="" id="no_reference_credit_${i}" class="form-control form-control-sm @error('journals.*.no_reference_credit') is-invalid @enderror" placeholder="No Reference Credit">
-				@error('journals.*.no_reference_credit')
-					<div class="invalid-feedback">
-						{{ $message }}
-					</div>
-				@enderror
-			</td>
-			<!-- <td class="form-group @error('journals.*.description_credit') has-error @enderror">
-				<input type="text" name="${name}[${i}][description_credit]" value="" id="description_credit_${i}" class="form-control form-control-sm @error('journals.*.description_credit') is-invalid @enderror" placeholder="Description Credit">
-				@error('journals.*.description_credit')
-					<div class="invalid-feedback">
-						{{ $message }}
-					</div>
-				@enderror
-			</td> -->
 			<td>
 				<button type="button" class="btn btn-sm btn-outline-danger journal_remove" data-id="${i}"><i class="fa fa-trash"></i></button>
 			</td>
@@ -182,7 +158,7 @@ $("#journals_wrap").remAddRow({
 			dateFormat: 'yy-mm-dd',
 		});
 
-		$(`#ledger_debit_id_${i}, #ledger_credit_id_${i}`).select2({
+		$(`#ledger_id_${i}`).select2({
 			theme: 'bootstrap-5',
 			placeholder: 'Please choose',
 			allowClear: true,
@@ -225,7 +201,7 @@ $("#journals_wrap").remAddRow({
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // restore ild value
 @php
-	$items = @$journal?->hasmanyjournalentries()?->get(['date', 'account_id', 'description_debit', 'no_reference_debit', 'ledger_debit_id', 'debit', 'credit', 'ledger_credit_id', 'no_reference_credit', 'description_credit']);
+	$items = @$journal?->hasmanyjournalentries()?->get(['id', 'date', 'account_id', 'description', 'no_reference', 'ledger_id', 'debit', 'credit']);
 	$itemsArray = $items?->toArray()??[];
 	$oldItemsValue = old('journals', $itemsArray);
 @endphp
@@ -238,8 +214,7 @@ if (oldJournals.length > 0) {
 		const $row = $("#journals_wrap").children().eq(i);
 
 		const $account_id = $row.find(`select[name="journals[${i}][account_id]"]`);
-		const $ledger_debit_id = $row.find(`select[name="journals[${i}][ledger_debit_id]"]`);
-		const $ledger_credit_id = $row.find(`select[name="journals[${i}][ledger_credit_id]"]`);
+		const $ledger_id = $row.find(`select[name="journals[${i}][ledger_id]"]`);
 
 		if (jrnl.account_id) {
 			$.ajax({
@@ -249,44 +224,30 @@ if (oldJournals.length > 0) {
 			}).then(data => {
 				const itema = Array.isArray(data) ? data[0] : data;	// change object to array
 				if (!itema) return;
-				const option1 = new Option(itema.code +' - '+ itema.account, data.id, true, true);
+				const option1 = new Option(itema.code +' - '+ itema.account, itema.id, true, true);
 				$account_id.append(option1).trigger('change');
 			});
 		}
 
-		if (jrnl.ledger_debit_id) {
+		if (jrnl.ledger_id) {
 			$.ajax({
 				url: `{{ route('getLedgers') }}`,
-				data: { id: jrnl.ledger_debit_id },
+				data: { id: jrnl.ledger_id },
 				dataType: 'json'
 			}).then(data => {
 				const itemb = Array.isArray(data) ? data[0] : data;	// change object to array
 				if (!itemb) return;
-				const option2 = new Option(itemb.belongstoaccounttype.account_type +' - '+ itemb.ledger, data.id, true, true);
-				$ledger_debit_id.append(option2).trigger('change');
+				const option2 = new Option(itemb.belongstoaccounttype.account_type +' - '+ itemb.ledger, itemb.id, true, true);
+				$ledger_id.append(option2).trigger('change');
 			});
 		}
 
-		if (jrnl.ledger_credit_id) {
-			$.ajax({
-				url: `{{ route('getLedgers') }}`,
-				data: { id: jrnl.ledger_credit_id },
-				dataType: 'json'
-			}).then(data => {
-				const itemc = Array.isArray(data) ? data[0] : data;	// change object to array
-				if (!itemc) return;
-				const option3 = new Option(itemc.belongstoaccounttype.account_type +' - '+ itemc.ledger, data.id, true, true);
-				$ledger_credit_id.append(option3).trigger('change');
-			});
-		}
 		$row.find(`input[name="journals[${i}][id]"]`).val(jrnl.id || '');
-		$row.find(`input[name="journals[${i}][date]"]`).val(jrnl.date || '');
-		// $row.find(`input[name="journals[${i}][description_debit]"]`).val(jrnl.description_debit || '');
-		$row.find(`input[name="journals[${i}][no_reference_debit]"]`).val(jrnl.no_reference_debit || '');
+		$row.find(`input[name="journals[${i}][date]"]`).val(moment(jrnl.date).format('YYYY-MM-DD') || '');
+		$row.find(`input[name="journals[${i}][description]"]`).val(jrnl.description || '');
+		$row.find(`input[name="journals[${i}][no_reference]"]`).val(jrnl.no_reference || '');
 		$row.find(`input[name="journals[${i}][debit]"]`).val(jrnl.debit || '');
 		$row.find(`input[name="journals[${i}][credit]"]`).val(jrnl.credit || '');
-		$row.find(`input[name="journals[${i}][no_reference_credit]"]`).val(jrnl.no_reference_credit || '');
-		// $row.find(`input[name="journals[${i}][description_credit]"]`).val(jrnl.description_credit || '');
 	});
 }
 
@@ -341,15 +302,15 @@ $('#form1').bootstrapValidator({
 				},
 			}
 		},
-		"journals[{!! $i !!}][description_debit]": {
+		"journals[{!! $i !!}][description]": {
 			validators: {
 			}
 		},
-		"journals[{!! $i !!}][no_reference_debit]": {
+		"journals[{!! $i !!}][no_reference]": {
 			validators: {
 			}
 		},
-		"journals[{!! $i !!}][ledger_debit_id]": {
+		"journals[{!! $i !!}][ledger_id]": {
 			validators: {
 			}
 		},
@@ -358,18 +319,6 @@ $('#form1').bootstrapValidator({
 			}
 		},
 		"journals[{!! $i !!}][credit]": {
-			validators: {
-			}
-		},
-		"journals[{!! $i !!}][ledger_credit_id]": {
-			validators: {
-			}
-		},
-		"journals[{!! $i !!}][no_reference_credit]": {
-			validators: {
-			}
-		},
-		"journals[{!! $i !!}][description_credit]": {
 			validators: {
 			}
 		},

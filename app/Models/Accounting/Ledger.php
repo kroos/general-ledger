@@ -57,14 +57,5 @@ class Ledger extends Model
 		return $this->HasMany(\App\Models\Accounting\Journal::class, 'ledger_id');
 	}
 
-	public function hasmanyjournalentrydebit(): HasMany
-	{
-		return $this->HasMany(\App\Models\Accounting\JournalEntry::class, 'ledger_debit_id');
-	}
-
-	public function hasmanyjournalentrycredit(): HasMany
-	{
-		return $this->HasMany(\App\Models\Accounting\JournalEntry::class, 'ledger_credit_id');
-	}
 
 }
