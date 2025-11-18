@@ -20,7 +20,7 @@
 			},
 			startCounter: 0,
 			onAdd: (i, $row) => {},
-			onRemove: (i) => {}
+			onRemove: (i, e) => {}
 		}, options);
 
 		const $wrapper = this;
@@ -104,9 +104,13 @@
 			if (!$target.length) $target = clicked.closest('.row-box');
 
 			if ($target.length) {
-				$target.remove();
-				if (settings.reindexOnRemove) reindexRows();
-				settings.onRemove(id);
+				settings.onRemove(id, e, $target);   // run callback first
+
+				// only remove if callback does NOT cancel it
+				if (!e.isDefaultPrevented()) {
+					$target.remove();
+					if (settings.reindexOnRemove) reindexRows();
+				}
 				updateAddBtnState();
 			} else {
 				console.warn('remAddRow: could not locate row to remove for id=', id);
