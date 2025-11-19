@@ -62,11 +62,16 @@ trait Auditable
 		});
 
 		static::deleted(function (Model $m) {
-			$event = $m->isForceDeleting() ? 'force_deleted' : 'deleted';
+			$event = method_exists($m, 'isForceDeleting') && $m->isForceDeleting()
+			? 'force_deleted'
+			: 'deleted';
 			$m->logActivity($event);
 		});
 
-		static::restored(fn(Model $m) => $m->logActivity('restored'));
+    // register "restored" only if model supports SoftDeletes
+		if (method_exists(static::class, 'restored')) {
+			static::restored(fn(Model $m) => $m->logActivity('restored'));
+		}
 	}
 
 	protected function getAuditExclude(): array
