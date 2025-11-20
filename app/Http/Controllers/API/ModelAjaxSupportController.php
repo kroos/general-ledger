@@ -74,7 +74,9 @@ class ModelAjaxSupportController extends Controller
 		$values = ActivityLog::with('belongstouser')
 											->when($request->search, function(Builder $query) use ($request){
 												$query->where('model_type','LIKE','%'.$request->search.'%')
-												->orWhere('ip_address','LIKE','%'.$request->search.'%');
+												->orWhereHas('belongstouser', function ($q2) use ($request) {
+													$q2->where('name', 'LIKE', '%' . $request->search . '%');
+												});
 											})
 											->when($request->id, function($query) use ($request){
 												$query->where('id', $request->id);
@@ -87,9 +89,14 @@ class ModelAjaxSupportController extends Controller
 	public function getAccounts(Request $request): JsonResponse
 	{
 		$accounts = Account::with('belongstoaccounttype')
-												->when($request->search, function (Builder $query) use ($request) {
-													$query->where('account', 'LIKE', '%' . $request->search . '%')
-														->orWhere('code','LIKE','%'.$request->search.'%');
+												->when($request->search, function ($query) use ($request) {
+													$query->where(function ($q) use ($request) {
+														$q->where('account', 'LIKE', '%' . $request->search . '%')
+														->orWhere('code','LIKE','%'.$request->search.'%')
+														->orWhereHas('belongstoaccounttype', function ($q2) use ($request) {
+															$q2->where('account_type', 'LIKE', '%' . $request->search . '%');
+														});
+													});
 												})
 												->when($request->id, function($query) use ($request){
 													$query->where('id', $request->id);
@@ -114,9 +121,13 @@ class ModelAjaxSupportController extends Controller
 	public function getLedgers(Request $request): JsonResponse
 	{
 		$ledgers = Ledger::with(['belongstoaccounttype', 'hasmanyjournal'])
-												->when($request->search, function (Builder $query) use ($request) {
-													$query->where('option', 'LIKE', '%' . $request->search . '%')
-														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+												->when($request->search, function ($query) use ($request) {
+													$query->where(function ($q) use ($request) {
+														$q->where('ledger', 'LIKE', '%' . $request->search . '%')
+														->orWhereHas('belongstoaccounttype', function ($q2) use ($request) {
+															$q2->where('account_type', 'LIKE', '%' . $request->search . '%');
+														});
+													});
 												})
 												->when($request->id, function($query) use ($request){
 													$query->where('id', $request->id);
@@ -129,8 +140,9 @@ class ModelAjaxSupportController extends Controller
 	{
 		$journals = Journal::with(['belongstoledger', 'hasmanyjournalentries'])
 												->when($request->search, function (Builder $query) use ($request) {
-													$query->where('option', 'LIKE', '%' . $request->search . '%')
-														->orWhere('ip_address','LIKE','%'.$request->search.'%');
+													$query->WhereHas('belongstoledger', function ($q2) use ($request) {
+														$q2->where('ledger', 'LIKE', '%' . $request->search . '%');
+													});
 												})
 												->when($request->id, function($query) use ($request){
 													$query->where('id', $request->id);

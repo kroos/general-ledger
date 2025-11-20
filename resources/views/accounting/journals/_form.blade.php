@@ -54,7 +54,7 @@
 			<th>Account</th>
 			<th>Description</th>
 			<th>No Reference</th>
-			<th>Journal</th>
+			<th>Ledger</th>
 			<th>Debit</th>
 			<th>Credit</th>
 			<th>

@@ -1,10 +1,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 $('#ledg').select2({
 	theme: 'bootstrap-5',
+	width: '100%',
 	placeholder: 'Please choose',
 	allowClear: true,
 	closeOnSelect: true,
-	width: '100%',
 	ajax: {
 		url: '{{ route('getLedgers') }}',
 		type: 'GET',
@@ -193,8 +193,39 @@ $("#journals_wrap").remAddRow({
 
 
 	},
-	onRemove: (i) => {
+	onRemove: (i, event, $row, name) => {
 		console.log("Journal removed:", `journal_${i}`);
+		event.preventDefault();
+		// console.log('Personnel removed', i, event, $row)
+		const idv = $row.find(`input[name="${name}[${i}][id]"]`).val();
+		if (!idv) {
+			$row.remove();
+			return;
+		}
+		swal.fire({
+			title: 'Delete journal?',
+			text: 'This action cannot be undone.',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			confirmButtonText: 'Yes, delete it!'
+		}).then(result => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: `{{ url('journals') }}/${idv}`,
+					type: 'DELETE',
+					data: { _token: $('meta[name="csrf-token"]').attr('content') },
+					success: response => {
+						swal.fire('Deleted!', response.message, 'success');
+						$row.remove();  // remove only after DB deletion
+					},
+					error: xhr => {
+						swal.fire('Error', 'Failed to delete email group member', 'error');
+					}
+				});
+			}
+		});
+
 	},
 });
 

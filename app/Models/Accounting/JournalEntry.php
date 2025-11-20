@@ -52,17 +52,17 @@ class JournalEntry extends Model
 
 	public function belongstojournal(): BelongsTo
 	{
-		return $this->BelongsTo(App\Models\Accounting\Journal::class, 'journal_id');
+		return $this->BelongsTo(\App\Models\Accounting\Journal::class, 'journal_id');
 	}
 
 	public function belongstoaccount(): BelongsTo
 	{
-		return $this->BelongsTo(App\Models\Accounting\Account::class, 'account_id');
+		return $this->BelongsTo(\App\Models\Accounting\Account::class, 'account_id');
 	}
 
 	public function belongstoledger(): BelongsTo
 	{
-		return $this->BelongsTo(App\Models\Accounting\Ledger::class, 'ledger_id');
+		return $this->BelongsTo(\App\Models\Accounting\Ledger::class, 'ledger_id');
 	}
 
 }
