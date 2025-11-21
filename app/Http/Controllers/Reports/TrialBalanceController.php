@@ -53,32 +53,6 @@ class TrialBalanceController extends Controller
 {
 	public function index(Request $request)
 	{
-		$from = $request->get('from', now()->startOfMonth()->toDateString());
-		$to = $request->get('to', now()->toDateString());
-
-		$accounts = Account::orderBy('code')
-												->with(['hasmanyjournalentries' => function ($query1) use ($from, $to) {
-														$query1->whereBetween('date', [$from, $to]);
-												}])
-												->get();
-
-		$rows = $accounts->map(function ($acc) {
-			$debit = $acc->hasmanyjournalentries->sum('debit');
-			$credit = $acc->hasmanyjournalentries->sum('credit');
-			$balance = $debit - $credit;
-
-			return [
-				'account' => $acc->code . ' - ' . $acc->account,
-				'debit' => number_format($debit, 2),
-				'credit' => number_format($credit, 2),
-				'balance' => number_format($balance, 2),
-				'type' => $balance >= 0 ? 'Debit' : 'Credit',
-			];
-		});
-
-		$totalDebit = $accounts->flatMap->hasmanyjournalentries->sum('debit');
-		$totalCredit = $accounts->flatMap->hasmanyjournalentries->sum('credit');
-
-		return view('reports.trial-balance.index', compact('rows', 'totalDebit', 'totalCredit', 'from', 'to'));
+		return view('reports.trial-balance.index');
 	}
 }

@@ -165,6 +165,118 @@ class ModelAjaxSupportController extends Controller
 		return response()->json($journalentries);
 	}
 
+	public function getGeneralLedgerReport(Request $request)
+	{
+		$accountId = $request->account_id;
+		$entries = JournalEntry::where('account_id', $accountId)
+		->orderBy('id')
+		->with(['belongstojournal', 'belongstoaccount', 'belongstoledger'])
+		->get();
+
+		$running = 0;
+		$data = [];
+		foreach ($entries as $entry) {
+			$running += ($entry->debit - $entry->credit);
+			$data[] = [
+				'date' => $entry->belongstojournal->date->format('j M Y'),
+				'journal_id' => $entry->journal_id,
+				'description' => $entry->description ?? $entry->belongstojournal->description,
+				'debit' => number_format($entry->debit, 2),
+				'credit' => number_format($entry->credit, 2),
+				'balance' => number_format($running, 2),
+			];
+		}
+		return response()->json($data);
+	}
+
+	public function getTrialBalanceReport(Request $request)
+	{
+		$from = $request->from;
+		$to = $request->to;
+
+		$accounts = Account::orderBy('code')
+		->with(['hasmanyjournalentries' => function ($query) use ($from, $to) {
+			$query->whereBetween('date', [$from, $to]);
+		}])
+		->get();
+
+		$rows = $accounts->map(function ($acc) {
+			$debit = $acc->hasmanyjournalentries->sum('debit');
+			$credit = $acc->hasmanyjournalentries->sum('credit');
+			$balance = $debit - $credit;
+
+			return [
+				'account' => $acc->code . ' - ' . $acc->account,
+				'debit' => number_format($debit, 2),
+				'credit' => number_format($credit, 2),
+				'balance' => number_format($balance, 2),
+				'type' => $balance >= 0 ? 'Debit' : 'Credit',
+			];
+		});
+
+		$totalDebit = $accounts->flatMap->hasmanyjournalentries->sum('debit');
+		$totalCredit = $accounts->flatMap->hasmanyjournalentries->sum('credit');
+
+    // DataTables expected JSON format
+		return response()->json([
+			'data' => $rows,
+			'totals' => [
+				'totalDebit' => number_format($totalDebit, 2),
+				'totalCredit' => number_format($totalCredit, 2),
+			],
+		]);
+	}
+
+	public function getBalanceSheetReport(Request $request)
+	{
+		$asOf = $request->get('as_of');
+
+		$accounts = Account::whereIn('account_type_id', [1,2,3,4])
+												->with(['hasmanyjournalentries' => function ($q) use ($asOf) {
+													$q->where('date', '<=', $asOf);
+												}])
+												->get();
+
+		$assets = $accounts->whereIn('account_type_id', [1,2]);
+		$liabilities = $accounts->where('account_type_id', 4);
+		$equity = $accounts->where('account_type_id', 3);
+
+    // Prepare rows as numeric arrays
+		$assetsRows = $assets->map(fn($a) => [
+			'account' => $a->account,
+			'amount' => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit')
+    ])->values()->all(); // <- ensure numeric array
+
+		$liabilitiesRows = $liabilities->map(fn($a) => [
+			'account' => $a->account,
+			'amount' => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit')
+    ])->values()->all(); // <- ensure numeric array
+
+		$equityRows = $equity->map(fn($a) => [
+			'account' => $a->account,
+			'amount' => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit')
+    ])->values()->all(); // <- ensure numeric array
+
+    // Totals
+		$totalAssets = $assets->sum(fn($a) => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit'));
+		$totalLiabilities = $liabilities->sum(fn($a) => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit'));
+		$totalEquity = $equity->sum(fn($a) => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit'));
+		$balance = $totalAssets - ($totalLiabilities + $totalEquity);
+
+		return response()->json([
+			'assets' => $assetsRows,
+			'liabilities' => $liabilitiesRows,
+			'equity' => $equityRows,
+			'totals' => [
+				'totalAssets' => $totalAssets,
+				'totalLiabilities' => $totalLiabilities,
+				'totalEquity' => $totalEquity,
+				'balance' => $balance,
+			],
+		]);
+	}
+
+
 
 
 }

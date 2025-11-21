@@ -15,8 +15,12 @@ Route::middleware(['auth', 'auth:sanctum'])->group(function () {
 		Route::get('/getLedgers', 'getLedgers')->name('getLedgers');
 		Route::get('/getJournals', 'getJournals')->name('getJournals');
 		Route::get('/getJournalEntries', 'getJournalEntries')->name('getJournalEntries');
+		Route::get('/getGeneralLedgerReport', 'getGeneralLedgerReport')->name('getGeneralLedgerReport');
+		Route::get('/getTrialBalanceReport', 'getTrialBalanceReport')->name('getTrialBalanceReport');
+		Route::get('/getBalanceSheetReport', 'getBalanceSheetReport')->name('getBalanceSheetReport');
 	});
 });
+
 
 // Get all countries
 Route::get('/countries', function () {

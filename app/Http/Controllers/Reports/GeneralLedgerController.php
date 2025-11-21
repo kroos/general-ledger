@@ -52,30 +52,6 @@ class GeneralLedgerController extends Controller
 {
 	public function index(Request $request)
 	{
-		if ($request->ajax()) {
-			$accountId = $request->account_id;
-			$entries = JournalEntry::where('account_id', $accountId)
-									->orderBy('id')
-									->with(['belongstojournal', 'belongstoaccount', 'belongstoledger'])
-									->get();
-
-			$running = 0;
-			$data = [];
-			foreach ($entries as $entry) {
-				$running += ($entry->debit - $entry->credit);
-				$data[] = [
-					'date' => $entry->belongstojournal->date->format('j M Y'),
-					'journal_id' => $entry->journal_id,
-					'description' => $entry->description ?? $entry->belongstojournal->description,
-					'debit' => number_format($entry->debit, 2),
-					'credit' => number_format($entry->credit, 2),
-					'balance' => number_format($running, 2),
-				];
-			}
-
-			return response()->json(['data' => $data]);
-		}
-
 		return view('reports.general-ledger.index');
 	}
 }

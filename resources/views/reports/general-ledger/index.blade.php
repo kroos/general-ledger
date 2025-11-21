@@ -65,7 +65,9 @@ $('#account_id').select2({
 });
 
 
-});$('#account_id').on('change', function(){
+});
+
+$('#account_id').on('change', function(){
 	let $selection = $(this).find(':selected');
 	const accId = $selection.val();
 
@@ -91,8 +93,8 @@ $('#account_id').select2({
 		dom: 'Bfrtip',
 		ajax: {
 			type: 'GET',
-			url: '{{ route('reports.general-ledger.index') }}',
-			dataSrc: 'data',
+			url: '{{ route('getGeneralLedgerReport') }}',
+			dataSrc: '',
 			data: function(da){
 				da._token = '{!! csrf_token() !!}';
 				da.account_id = accId;
