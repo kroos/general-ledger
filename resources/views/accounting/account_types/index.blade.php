@@ -6,9 +6,11 @@
 		<div class="text-dark text-secondary">
 			<h6>Account Types</h6>
 		</div>
+<!--
 		<div class="text-dark text-secondary">
 			<a href="{{ route('account-types.create') }}" class="btn btn-sm btn-outline-primary">Create New</a>
 		</div>
+ -->
 	</div>
 	<div class="card-body">
 		<table class="table table-hover" id="at">
@@ -50,13 +52,14 @@ var table = $('#at').DataTable({
 			searchable:false,
 			render: function(id){
 				return `
+<!--
 					<div class="btn-group btn-group-sm" role="group">
-						<!-- <a href="{{ url('account-types') }}/${id}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i></a> -->
 						<a href="{{ url('account-types') }}/${id}/edit" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
 						<button type="button" class="btn btn-sm btn-outline-danger remove" data-id="${id}">
 							<i class="fa fa-trash"></i>
 						</button>
 					</div>
+ -->
 				`
 			}
 		}

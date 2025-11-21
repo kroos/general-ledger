@@ -28,7 +28,7 @@ class AccountSeeder extends Seeder
 			'account' => 'Assets',
 		]);
 		\App\Models\Accounting\Account::create([
-			'account_type_id' => 1,
+			'account_type_id' => 5,
 			'code' => 1300,
 			'account' => 'Sales Revenue',
 		]);
@@ -48,12 +48,12 @@ class AccountSeeder extends Seeder
 			'account' => 'Accounts Payable',
 		]);
 		\App\Models\Accounting\Account::create([
-			'account_type_id' => 4,
+			'account_type_id' => 6,
 			'code' => 4100,
 			'account' => 'Cost of Goods Sold',
 		]);
 		\App\Models\Accounting\Account::create([
-			'account_type_id' => 4,
+			'account_type_id' => 6,
 			'code' => 4200,
 			'account' => 'Operating Expenses',
 		]);

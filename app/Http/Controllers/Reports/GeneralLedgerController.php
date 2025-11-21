@@ -54,8 +54,7 @@ class GeneralLedgerController extends Controller
 	{
 		if ($request->ajax()) {
 			$accountId = $request->account_id;
-			$entries = JournalEntry::/*whereHas('journal', fn($q) => $q->where('status', 'posted'))
-									->*/where('account_id', $accountId)
+			$entries = JournalEntry::where('account_id', $accountId)
 									->orderBy('id')
 									->with(['belongstojournal', 'belongstoaccount', 'belongstoledger'])
 									->get();
@@ -67,7 +66,7 @@ class GeneralLedgerController extends Controller
 				$data[] = [
 					'date' => $entry->belongstojournal->date->format('j M Y'),
 					'journal_id' => $entry->journal_id,
-					'desc' => $entry->description ?? $entry->belongstojournal->description,
+					'description' => $entry->description ?? $entry->belongstojournal->description,
 					'debit' => number_format($entry->debit, 2),
 					'credit' => number_format($entry->credit, 2),
 					'balance' => number_format($running, 2),

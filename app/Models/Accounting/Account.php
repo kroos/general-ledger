@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 // use Illuminate\Database\Eloquent\Relations\HasOne;
 // use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 // use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
-// use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 // use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 // use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -47,8 +47,13 @@ class Account extends Model
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// relationship
-		public function belongstoaccounttype(): BelongsTo
-		{
-			return $this->BelongsTo(\App\Models\Accounting\AccountType::class, 'account_type_id');
-		}
+	public function belongstoaccounttype(): BelongsTo
+	{
+		return $this->BelongsTo(\App\Models\Accounting\AccountType::class, 'account_type_id');
+	}
+
+	public function hasmanyjournalentries(): HasMany
+	{
+		return $this->HasMany(\App\Models\Accounting\JournalEntry::class, 'account_id');
+	}
 }

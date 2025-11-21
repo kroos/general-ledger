@@ -23,8 +23,8 @@
         <table class="table table-sm table-bordered">
           @foreach($assets as $acc)
             <tr>
-              <td>{{ $acc->name }}</td>
-              <td class="text-end">{{ number_format($acc->entries->sum('debit') - $acc->entries->sum('credit'), 2) }}</td>
+              <td>{{ $acc->account }}</td>
+              <td class="text-end">{{ number_format($acc->hasmanyjournalentries->sum('debit') - $acc->hasmanyjournalentries->sum('credit'), 2) }}</td>
             </tr>
           @endforeach
           <tr class="fw-bold">
@@ -39,8 +39,8 @@
         <table class="table table-sm table-bordered">
           @foreach($liabilities as $acc)
             <tr>
-              <td>{{ $acc->name }}</td>
-              <td class="text-end">{{ number_format($acc->entries->sum('credit') - $acc->entries->sum('debit'), 2) }}</td>
+              <td>{{ $acc->account }}</td>
+              <td class="text-end">{{ number_format($acc->hasmanyjournalentries->sum('credit') - $acc->hasmanyjournalentries->sum('debit'), 2) }}</td>
             </tr>
           @endforeach
           <tr class="fw-bold">
@@ -55,8 +55,8 @@
         <table class="table table-sm table-bordered">
           @foreach($equity as $acc)
             <tr>
-              <td>{{ $acc->name }}</td>
-              <td class="text-end">{{ number_format($acc->entries->sum('credit') - $acc->entries->sum('debit'), 2) }}</td>
+              <td>{{ $acc->account }}</td>
+              <td class="text-end">{{ number_format($acc->hasmanyjournalentries->sum('credit') - $acc->hasmanyjournalentries->sum('debit'), 2) }}</td>
             </tr>
           @endforeach
           <tr class="fw-bold">

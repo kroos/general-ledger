@@ -8,14 +8,11 @@
 	<div class="card-body">
 
 		<div class="row mb-3">
-			<div class="col-sm-5 @error('account_id') has-error @enderror">
-				<label for="account_id" class="form-label">Account</label>
-				<select name="account_id" id="account_id" class="form-select form-select-sm select2 @error('account_id') is-invalid @enderror"></select>
-			</div>
-			<div class="col-md-2 my-auto">
-				<button id="btnLoad" class="btn btn-primary btn-sm mt-4">
-					<i class="fa fa-search"></i> Load
-				</button>
+			<div class="col-sm-12 row">
+				<label for="account_id" class="col-sm-2 col-form-label">Account :</label>
+				<div class="col-sm-6 my-auto">
+					<select name="account_id" id="account_id" class="form-select form-select-sm select2 @error('account_id') is-invalid @enderror"></select>
+				</div>
 			</div>
 		</div>
 
@@ -67,28 +64,50 @@ $('#account_id').select2({
 	},
 });
 
-$('#btnLoad').on('click', function(){
-	const accId = $('#account_id').val();
-	if(!accId){
+
+});$('#account_id').on('change', function(){
+	let $selection = $(this).find(':selected');
+	const accId = $selection.val();
+
+	if(!accId) {
 		swal.fire('Select Account', 'Please select an account first.', 'warning');
+		$('#ledger-table').DataTable().clear().draw(); // or destroy
 		return;
 	}
 
-	const table = $('#ledger-table').DataTable({
-		destroy: true,
+	// Destroy old DataTable if exists
+	if ($.fn.DataTable.isDataTable('#ledger-table')) {
+		$('#ledger-table').DataTable().destroy();
+	}
+
+	$('#ledger-table').DataTable({
+		columnDefs: [
+			{ type: 'date', 'targets': [0] },
+		],
+		order: [[0, 'asc']],
+		responsive: true,
+		autoWidth: true,
+		fixedHeader: true,
+		dom: 'Bfrtip',
 		ajax: {
-			url: '{{ route("reports.general-ledger.index") }}',
-			data: { account_id: accId }
+			type: 'GET',
+			url: '{{ route('reports.general-ledger.index') }}',
+			dataSrc: 'data',
+			data: function(da){
+				da._token = '{!! csrf_token() !!}';
+				da.account_id = accId;
+			},
 		},
 		columns: [
-		{data:'date', title:'Date'},
-		{data:'journal_id', title:'Journal #'},
-		{data:'desc', title:'Description'},
-		{data:'debit', title:'Debit', className:'text-end'},
-		{data:'credit', title:'Credit', className:'text-end'},
-		{data:'balance', title:'Balance', className:'text-end'},
+			{data:'date', title:'Date'},
+			{data:'journal_id', title:'Journal #'},
+			{data:'description', title:'Description'},
+			{data:'debit', title:'Debit', className:'text-end'},
+			{data:'credit', title:'Credit', className:'text-end'},
+			{data:'balance', title:'Balance', className:'text-end'},
 		],
-		order:[[0,'asc']]
+		initComplete: function(settings, response) {
+			console.log(response);
+		}
 	});
-});
 @endsection

@@ -54,21 +54,19 @@ class BalanceSheetController extends Controller
 	{
 		$asOf = $request->get('as_of', now()->toDateString());
 
-		$accounts = Account::whereIn('type', ['asset', 'liability', 'equity'])
-		->with(['entries' => function ($q) use ($asOf) {
-			$q->whereHas('journal', function ($j) use ($asOf) {
-				$j->where('status', 'posted')
-				->where('date', '<=', $asOf);
-			});
-		}])->get();
+		$accounts = Account::whereIn('account_type_id', [1,2,3,4])
+																->with(['hasmanyjournalentries' => function ($q) use ($asOf) {
+																	$q->where('date', '<=', $asOf);
+																}])
+																->get();
 
-		$assets = $accounts->where('type', 'asset');
-		$liabilities = $accounts->where('type', 'liability');
-		$equity = $accounts->where('type', 'equity');
+		$assets = $accounts->whereIn('account_type_id', [1,2]); // asset and current asset
+		$liabilities = $accounts->where('account_type_id', 4);	// liability
+		$equity = $accounts->where('account_type_id', 3);	// equity
 
-		$totalAssets = $assets->sum(fn($a) => $a->entries->sum('debit') - $a->entries->sum('credit'));
-		$totalLiabilities = $liabilities->sum(fn($a) => $a->entries->sum('credit') - $a->entries->sum('debit'));
-		$totalEquity = $equity->sum(fn($a) => $a->entries->sum('credit') - $a->entries->sum('debit'));
+		$totalAssets = $assets->sum(fn($a) => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit'));
+		$totalLiabilities = $liabilities->sum(fn($a) => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit'));
+		$totalEquity = $equity->sum(fn($a) => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit'));
 
 		$balance = $totalAssets - ($totalLiabilities + $totalEquity);
 

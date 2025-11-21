@@ -28,7 +28,7 @@
             <tr>
               <td>{{ $acc->name }}</td>
               <td class="text-end">
-                {{ number_format($acc->entries->sum('credit') - $acc->entries->sum('debit'), 2) }}
+                {{ number_format($acc->hasmanyjournalentries->sum('credit') - $acc->hasmanyjournalentries->sum('debit'), 2) }}
               </td>
             </tr>
           @endforeach
@@ -46,7 +46,7 @@
             <tr>
               <td>{{ $acc->name }}</td>
               <td class="text-end">
-                {{ number_format($acc->entries->sum('debit') - $acc->entries->sum('credit'), 2) }}
+                {{ number_format($acc->hasmanyjournalentries->sum('debit') - $acc->hasmanyjournalentries->sum('credit'), 2) }}
               </td>
             </tr>
           @endforeach

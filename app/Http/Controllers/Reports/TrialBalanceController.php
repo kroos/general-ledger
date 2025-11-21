@@ -57,20 +57,18 @@ class TrialBalanceController extends Controller
 		$to = $request->get('to', now()->toDateString());
 
 		$accounts = Account::orderBy('code')
-		->with(['entries' => function ($q) use ($from, $to) {
-			$q->whereHas('journal', function ($j) use ($from, $to) {
-				$j->whereBetween('date', [$from, $to])
-				->where('status', 'posted');
-			});
-		}])->get();
+												->with(['hasmanyjournalentries' => function ($query1) use ($from, $to) {
+														$query1->whereBetween('date', [$from, $to]);
+												}])
+												->get();
 
 		$rows = $accounts->map(function ($acc) {
-			$debit = $acc->entries->sum('debit');
-			$credit = $acc->entries->sum('credit');
+			$debit = $acc->hasmanyjournalentries->sum('debit');
+			$credit = $acc->hasmanyjournalentries->sum('credit');
 			$balance = $debit - $credit;
 
 			return [
-				'account' => $acc->code . ' - ' . $acc->name,
+				'account' => $acc->code . ' - ' . $acc->account,
 				'debit' => number_format($debit, 2),
 				'credit' => number_format($credit, 2),
 				'balance' => number_format($balance, 2),
@@ -78,8 +76,8 @@ class TrialBalanceController extends Controller
 			];
 		});
 
-		$totalDebit = $accounts->flatMap->entries->sum('debit');
-		$totalCredit = $accounts->flatMap->entries->sum('credit');
+		$totalDebit = $accounts->flatMap->hasmanyjournalentries->sum('debit');
+		$totalCredit = $accounts->flatMap->hasmanyjournalentries->sum('credit');
 
 		return view('reports.trial-balance.index', compact('rows', 'totalDebit', 'totalCredit', 'from', 'to'));
 	}

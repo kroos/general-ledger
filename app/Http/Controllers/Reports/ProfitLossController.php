@@ -56,19 +56,25 @@ class ProfitLossController extends Controller
 		$to = $request->get('to', now()->toDateString());
 
 		// Fetch only Income & Expense accounts
-		$accounts = Account::whereIn('type', ['income', 'expense'])
-		->with(['entries' => function ($q) use ($from, $to) {
-			$q->whereHas('journal', function ($j) use ($from, $to) {
-				$j->whereBetween('date', [$from, $to])
-				->where('status', 'posted');
-			});
-		}])->get();
+		// $accounts = Account::whereIn('type', ['income', 'expense'])
+		// 											->with(['entries' => function ($q) use ($from, $to) {
+		// 												$q->whereHas('journal', function ($j) use ($from, $to) {
+		// 													$j->whereBetween('date', [$from, $to])
+		// 													->where('status', 'posted');
+		// 												});
+		// 											}])->get();
 
-		$incomeAccounts = $accounts->where('type', 'income');
-		$expenseAccounts = $accounts->where('type', 'expense');
+		$accounts = Account::whereIn('account_type_id', [5, 6])		// grap only income and expense
+													->with(['hasmanyjournalentries' => function($q) use ($from, $to){
+														$q->whereBetween('date', [$from, $to]);
+													}])
+													->get();
 
-		$totalIncome = $incomeAccounts->sum(fn($a) => $a->entries->sum('credit') - $a->entries->sum('debit'));
-		$totalExpense = $expenseAccounts->sum(fn($a) => $a->entries->sum('debit') - $a->entries->sum('credit'));
+		$incomeAccounts  = $accounts->where('account_type_id', 5);
+		$expenseAccounts = $accounts->where('account_type_id', 6);
+
+		$totalIncome = $incomeAccounts->sum(fn($a) => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit'));
+		$totalExpense = $expenseAccounts->sum(fn($a) => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit'));
 
 		$netProfit = $totalIncome - $totalExpense;
 
