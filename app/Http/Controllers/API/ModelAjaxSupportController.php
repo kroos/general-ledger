@@ -276,7 +276,51 @@ class ModelAjaxSupportController extends Controller
 		]);
 	}
 
+	public function getProfitLossReport(Request $request)
+	{
+		$from = $request->from;
+		$to = $request->to;
 
+		$accounts = Account::whereIn('account_type_id', [5, 6])		// grap only income and expense
+													->with(['hasmanyjournalentries' => function($q) use ($from, $to){
+														$q->whereBetween('date', [$from, $to]);
+													}])
+													->get();
+													// ->ddrawsql();
+													// ->dd();
+
+		$incomeAccounts  = $accounts->where('account_type_id', 5);
+		$expenseAccounts = $accounts->where('account_type_id', 6);
+
+		$incomesRows = $incomeAccounts->map(fn($a) => [
+																										'account' => $a->account,
+																										'amount' => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit')
+																							    ])
+																									// ->dd();
+																							    ->values()
+																							    ->all(); // <- ensure numeric array
+
+		$expensesRows = $expenseAccounts->map(fn($a) => [
+																									'account' => $a->account,
+																									'amount' => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit')
+																						    ])
+																						    ->values()
+																						    ->all(); // <- ensure numeric array
+
+
+		$totalIncome = $incomeAccounts->sum(fn($a) => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit'));
+		$totalExpense = $expenseAccounts->sum(fn($a) => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit'));
+
+		$netProfit = $totalIncome - $totalExpense;
+
+		return response()->json([
+			'incomesRows' => $incomesRows,
+			'expensesRows' => $expensesRows,
+			'totalIncome' => $totalIncome,
+			'totalExpense' => $totalExpense,
+			'netProfit' => $netProfit,
+		]);
+	}
 
 
 }

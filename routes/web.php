@@ -58,10 +58,4 @@ Route::middleware('guest')->group(function () {
 // 	Route::get('/getLedgerEntries', 'getLedgerEntries')->name('getLedgerEntries');
 // });
 
-
-
-
-
-
-
 require __DIR__.'/auth.php';

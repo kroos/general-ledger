@@ -52,34 +52,25 @@ class ProfitLossController extends Controller
 {
 	public function index(Request $request)
 	{
-		$from = $request->get('from', now()->startOfMonth()->toDateString());
-		$to = $request->get('to', now()->toDateString());
+		// $from = $request->from;
+		// $to = $request->to;
 
-		// Fetch only Income & Expense accounts
-		// $accounts = Account::whereIn('type', ['income', 'expense'])
-		// 											->with(['entries' => function ($q) use ($from, $to) {
-		// 												$q->whereHas('journal', function ($j) use ($from, $to) {
-		// 													$j->whereBetween('date', [$from, $to])
-		// 													->where('status', 'posted');
-		// 												});
-		// 											}])->get();
+		// $accounts = Account::whereIn('account_type_id', [5, 6])		// grap only income and expense
+		// 											->with(['hasmanyjournalentries' => function($q) use ($from, $to){
+		// 												$q->whereBetween('date', [$from, $to]);
+		// 											}])
+		// 											->get();
 
-		$accounts = Account::whereIn('account_type_id', [5, 6])		// grap only income and expense
-													->with(['hasmanyjournalentries' => function($q) use ($from, $to){
-														$q->whereBetween('date', [$from, $to]);
-													}])
-													->get();
+		// $incomeAccounts  = $accounts->where('account_type_id', 5);
+		// $expenseAccounts = $accounts->where('account_type_id', 6);
 
-		$incomeAccounts  = $accounts->where('account_type_id', 5);
-		$expenseAccounts = $accounts->where('account_type_id', 6);
+		// $totalIncome = $incomeAccounts->sum(fn($a) => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit'));
+		// $totalExpense = $expenseAccounts->sum(fn($a) => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit'));
 
-		$totalIncome = $incomeAccounts->sum(fn($a) => $a->hasmanyjournalentries->sum('credit') - $a->hasmanyjournalentries->sum('debit'));
-		$totalExpense = $expenseAccounts->sum(fn($a) => $a->hasmanyjournalentries->sum('debit') - $a->hasmanyjournalentries->sum('credit'));
+		// $netProfit = $totalIncome - $totalExpense;
 
-		$netProfit = $totalIncome - $totalExpense;
-
-		return view('reports.profit-loss.index', compact(
-			'incomeAccounts', 'expenseAccounts', 'totalIncome', 'totalExpense', 'netProfit', 'from', 'to'
-		));
+		return view('reports.profit-loss.index');
 	}
+
+
 }
