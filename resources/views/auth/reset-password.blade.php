@@ -15,6 +15,8 @@
 			</div>
 		</div>
 
+		<input type="hidden" name="token" value="{{ $request->token }}">
+
 		<div class="form-group row m-2 @error('password') has-error @enderror">
 			<label for="password" class="col-sm-4 col-form-label col-form-label-sm">Password : </label>
 			<div class="col-sm-8">
