@@ -8,13 +8,6 @@ import './jquery-ui-prefix';
 // Added: Actual Bootstrap JavaScript dependency
 import * as bootstrap from '../../node_modules/bootstrap/dist/js/bootstrap.bundle';
 
-// Then load Alpine
-import Alpine from 'alpinejs';
-document.addEventListener("DOMContentLoaded", () => {
-	window.Alpine = Alpine;
-	Alpine.start();
-});
-
 // select2
 import select2 from 'select2';
 select2();
@@ -57,6 +50,8 @@ import './fullcalendar';
 // addRemoveRow
 import	'./addRemoveRowjQueryPlugins';
 
-
 // bootstrap validator 5
 import	'./bootstrapValidator5';
+
+// bootstrap validator 5
+import	'./bootstrap';
