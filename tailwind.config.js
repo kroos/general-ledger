@@ -18,5 +18,10 @@ module.exports = {
 			},
 		},
 	},
-	plugins: [forms],
+	// plugins: [forms],
+	plugins: [
+		require('@tailwindcss/forms')({
+			strategy: 'class',
+		}),
+	],
 };

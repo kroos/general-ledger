@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import { path  } from 'path';
 
-
 export default defineConfig({
 	plugins: [
 		laravel({
@@ -15,6 +14,6 @@ export default defineConfig({
 		}),
 	],
 	build: {
-			chunkSizeWarningLimit: 4000,
-		},
+		chunkSizeWarningLimit: 4000,
+	},
 });
