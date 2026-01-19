@@ -48,7 +48,7 @@ import  './chart';
 import './fullcalendar';
 
 // addRemoveRow
-import	'./addRemoveRowjQueryPlugins';
+import	'./addRemoveRowBootstrapValidatorSweetAlert2AjaxjQueryPlugin';
 
 // bootstrap validator 5
 import	'./bootstrapValidator5';
