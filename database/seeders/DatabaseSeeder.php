@@ -20,9 +20,8 @@ class DatabaseSeeder extends Seeder
 		// ]);
 
 		$this->call([
-				YesNoOptionSeeder::class,
 				AccountTypeSeeder::class,
-				// AccountSeeder::class,
+				AccountSeeder::class,
 		]);
 	}
 }
