@@ -22,7 +22,6 @@ use App\Http\Controllers\Reports\BalanceSheetController;
 
 use App\Http\Controllers\System\ActivityLogController;
 
-
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -86,18 +85,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
-
-
-
-
-// Route::prefix('/account-type')->name('account-type.')->group(function () {
-// 	Route::get('/', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'index'])->name('index');
-// 	Route::get('/create', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'create'])->name('create');
-// 	Route::post('/', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'store'])->name('store');
-// 	Route::get('/{accountType}', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'show'])->name('show');
-// 	Route::get('/{accountType}', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'show'])->name('show');
-// 	Route::get('/{accountType}/edit', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'edit'])->name('edit');
-// 	Route::patch('/{accountType}', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'update'])->name('update');
-// 	Route::delete('/{accountType}', [\App\Http\Controllers\Accounting\AccountTypeController::class, 'destroy'])->name('destroy');
-// });
-// Route::resource('journals', App\Http\Controllers\Accounting\JournalController::class);

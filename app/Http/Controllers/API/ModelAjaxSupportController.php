@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 
 // models
 use App\Models\{
-	YesNoOption, ActivityLog
+	ActivityLog
 };
 use App\Models\Accounting\{
 	Account, AccountType, Ledger, Journal, JournalEntry
@@ -56,19 +56,6 @@ use Log;
 
 class ModelAjaxSupportController extends Controller
 {
-	// this 1 need chunks sooner or later
-	public function getYesNoOptions(Request $request): JsonResponse
-	{
-		$yno = YesNoOption::when($request->search, function (Builder $query) use ($request) {
-													$query->where('option', 'LIKE', '%' . $request->search . '%');
-												})
-												->when($request->id, function($query) use ($request){
-													$query->where('id', $request->id);
-												})
-												->get();
-		return response()->json($yno);
-	}
-
 	public function getActivityLogs(Request $request): JsonResponse
 	{
 		$values = ActivityLog::with('belongstouser')
