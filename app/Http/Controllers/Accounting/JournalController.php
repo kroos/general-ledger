@@ -162,10 +162,10 @@ class JournalController extends Controller
 											]);
 		$journal->update($request->only(['ledger_id', 'date', 'no_reference', 'description']));
 
-	foreach ($request->journals as $entryData) {
+	foreach ($request->journals as $journal) {
 		$journal->hasmanyjournalentries()->updateOrCreate(
-			['id' => $entryData['id'] ?? null],
-			$entryData
+			['id' => $journal['id'] ?? null],
+			$journal
 		);
 	}
 
