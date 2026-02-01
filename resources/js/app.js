@@ -55,3 +55,7 @@ import	'./bootstrap';
 
 // addRemoveRow
 import	'addremrow-validator5-swal2-ajax';
+
+// datatable plugin
+import	'./dataTable-any-number.js';
+import	'./dataTable-moment.js';
