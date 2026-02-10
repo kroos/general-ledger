@@ -48,7 +48,7 @@ import  './chart';
 import './fullcalendar';
 
 // bootstrap validator 5
-import	'bootstrapValidator5';
+import	'bootstrapvalidator5';
 
 // bootstrap
 import	'./bootstrap';
