@@ -21,7 +21,7 @@ const config = {
 		],
 		order: [[0, 'desc']],
 		responsive: true,
-		autoWidth: false,
+		autoWidth: true,
 		fixedHeader: true,
 		// dom: 'Bfrtip',
 	},

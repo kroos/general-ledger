@@ -1,15 +1,5 @@
-// load axios
-// import axios from 'axios';
-// window.axios = axios;
-// window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-
-// Then load Alpine
-// import Alpine from 'alpinejs';
-// document.addEventListener("DOMContentLoaded", () => {
-// 	window.Alpine = Alpine;
-// 	Alpine.start();
-// });
+// routing js
+import { loadModule } from './moduleLoader';
 
 $(async function () {
 
@@ -41,4 +31,11 @@ $(async function () {
 	} catch (e) {
 		console.warn('Sanctum CSRF cookie failed');
 	}
+
+	/* ================================
+	 * 3️⃣ AUTO LOAD ROUTE JS
+	 * ================================ */
+	const route = document.body.dataset.route;
+	await loadModule(route);
+
 });

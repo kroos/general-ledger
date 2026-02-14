@@ -19,73 +19,13 @@
 @endsection
 
 @section('js')
-var table = $('#at').DataTable({
-	// columnDefs: [
-	// 	{ type: 'date', 'targets': [4,5,6] },
-	// 	// { type: 'time', 'targets': [6] },
-	// ],
-	order: [[0, 'asc'], [1, 'asc']],
-	responsive: true,
-	autoWidth: true,
-	fixedHeader: true,
-	dom: 'Bfrtip',
-	ajax: {
-		type: 'GET',
-		url: '{{ route('getAccounts') }}',
-		dataSrc: '',
-		data: function(da){
-			da._token = '{!! csrf_token() !!}'
-		},
+window.data = {
+	route: {
+		getAccounts: `{{ route('getAccounts') }}`,
 	},
-	columns: [
-		{ data: 'id', title: 'ID' },
-		{ data: 'belongstoaccounttype.account_type', title: 'Account Type' },
-		{ data: 'code', title: 'Code', defaultContent: '-' },
-		{ data: 'account', title: 'Account', defaultContent: '-' },
-		{ data: 'Description', title: 'Description', defaultContent: '-', orderable: false, searchable:false },
-		{
-			data: 'id',
-			title: '#',
-			orderable: false,
-			searchable:false,
-			render: function(id){
-				return `
-					<div class="btn-group btn-group-sm" role="group">
-						<!-- <a href="{{ url('accounts') }}/${id}" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i></a> -->
-						<a href="{{ url('accounts') }}/${id}/edit" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
-						<button type="button" class="btn btn-sm btn-outline-danger remove" data-id="${id}">
-							<i class="fa fa-trash"></i>
-						</button>
-					</div>
-				`
-			}
-		}
-	],
-	initComplete: function(settings, response) {
-		console.log(response); // This runs after successful loading
-	}
-});
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-$(document).on('click', '.remove', function(e){
-	const id = $(this).data('id');
-	swal.fire({
-		title: 'Delete Account Type?',
-		text: 'This will delete the account type record.',
-		icon: 'warning',
-		showCancelButton: true,
-		confirmButtonText: 'Yes, delete it'
-	}).then(res=>{
-		if(res.isConfirmed){
-			$.ajax({
-				url: '{{ url("accounts") }}/'+id,
-				type: 'DELETE',
-				data: {_token:'{{ csrf_token() }}'},
-				success: ()=> table.ajax.reload(null, false)
-				// false = keep current page, true = reset to first page
-			});
-		}
-	});
-});
-
+	url: {
+		accounts: `{{ url('accounts') }}`,
+	},
+	old: {},
+};
 @endsection
