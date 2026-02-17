@@ -58,6 +58,9 @@ import	'bootstrapvalidator5';
 import	'./dataTable-any-number.js';
 import	'./dataTable-moment.js';
 
+/* ckeditor */
+import	'./ckeditor5';
+
 // bootstrap
 import	'./bootstrap';
 
